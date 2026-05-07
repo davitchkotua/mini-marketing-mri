@@ -1,0 +1,36 @@
+import { z } from "zod";
+import { quizQuestions } from "./quiz-data";
+
+const answersShape = quizQuestions.reduce(
+  (acc, q) => {
+    acc[q.key] = z.number().int().min(0).max(4);
+    return acc;
+  },
+  {} as Record<string, z.ZodNumber>
+);
+
+export const submissionSchema = z.object({
+  name: z.string().trim().min(1, "სახელი აუცილებელია"),
+  email: z.string().trim().email("შეიყვანე ვალიდური ელფოსტა"),
+  company: z.string().trim().min(1, "კომპანიის სახელი აუცილებელია"),
+  role: z.string().trim().min(1, "შენი როლი აუცილებელია"),
+  website: z.string().trim().optional().or(z.literal("")),
+  revenue_range: z.string().trim().optional().or(z.literal("")),
+  team_size: z.string().trim().optional().or(z.literal("")),
+  consent: z.literal(true, {
+    errorMap: () => ({ message: "თანხმობა აუცილებელია" }),
+  }),
+  answers: z.object(answersShape),
+  utm: z
+    .object({
+      utm_source: z.string().optional(),
+      utm_medium: z.string().optional(),
+      utm_campaign: z.string().optional(),
+      utm_content: z.string().optional(),
+      utm_term: z.string().optional(),
+    })
+    .partial()
+    .optional(),
+});
+
+export type SubmissionInput = z.infer<typeof submissionSchema>;

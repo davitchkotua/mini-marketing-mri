@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #f7f5f0;
+  color: #0b0f14;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: "Noto Sans Georgian", "Inter", system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-white transition hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-ink bg-transparent px-5 py-3 text-base font-medium text-ink transition hover:bg-ink hover:text-paper;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-ink transition hover:border-ink;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.02)];
+  }
+  .field {
+    @apply w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base text-ink outline-none transition focus:border-ink;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-soft;
+  }
+  .helper {
+    @apply mt-1 text-sm text-ink-muted;
+  }
+  .err {
+    @apply mt-1 text-sm text-warn;
+  }
+}
