@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { quizQuestions, revenueRanges, teamSizeRanges, type DimensionKey } from "@/lib/quiz-data";
+import { quizQuestions, type DimensionKey } from "@/lib/quiz-data";
 import { track } from "@/lib/analytics";
 import { ProgressBar } from "./ProgressBar";
 
@@ -11,10 +11,7 @@ type Lead = {
   name: string;
   email: string;
   company: string;
-  role: string;
-  website: string;
-  revenue_range: string;
-  team_size: string;
+  phone: string;
   consent: boolean;
 };
 
@@ -22,10 +19,7 @@ const emptyLead: Lead = {
   name: "",
   email: "",
   company: "",
-  role: "",
-  website: "",
-  revenue_range: "",
-  team_size: "",
+  phone: "",
   consent: false,
 };
 
@@ -166,13 +160,13 @@ export function QuizClient() {
 
             <div className="mt-6 grid gap-4">
               <Field
-                label="სახელი *"
+                label="სახელი და გვარი *"
                 value={lead.name}
                 onChange={(v) => setLead({ ...lead, name: v })}
                 error={leadErrors.name}
               />
               <Field
-                label="ელფოსტა *"
+                label="ელ-ფოსტა *"
                 type="email"
                 value={lead.email}
                 onChange={(v) => setLead({ ...lead, email: v })}
@@ -184,27 +178,10 @@ export function QuizClient() {
                 onChange={(v) => setLead({ ...lead, company: v })}
               />
               <Field
-                label="შენი როლი (არასავალდებულო)"
-                placeholder="Founder, CEO, Marketing Lead..."
-                value={lead.role}
-                onChange={(v) => setLead({ ...lead, role: v })}
-              />
-              <Field
-                label="ვებსაიტი ან სოც. გვერდი (არასავალდებულო)"
-                value={lead.website}
-                onChange={(v) => setLead({ ...lead, website: v })}
-              />
-              <SelectField
-                label="თვიური შემოსავლის დიაპაზონი (არასავალდებულო)"
-                value={lead.revenue_range}
-                onChange={(v) => setLead({ ...lead, revenue_range: v })}
-                options={revenueRanges}
-              />
-              <SelectField
-                label="გუნდის ზომა (არასავალდებულო)"
-                value={lead.team_size}
-                onChange={(v) => setLead({ ...lead, team_size: v })}
-                options={teamSizeRanges}
+                label="ტელეფონის ნომერი (არასავალდებულო)"
+                type="tel"
+                value={lead.phone}
+                onChange={(v) => setLead({ ...lead, phone: v })}
               />
 
               <label className="mt-2 flex items-start gap-3 text-sm text-ink-soft">
@@ -244,7 +221,7 @@ export function QuizClient() {
           )}
           {isQuestionStep ? (
             <button type="button" onClick={next} className="btn-primary">
-              {step === quizQuestions.length - 1 ? "საკონტაქტოზე გადასვლა" : "შემდეგი"}
+              {step === quizQuestions.length - 1 ? "შედეგები" : "შემდეგი"}
             </button>
           ) : (
             <button
