@@ -111,7 +111,7 @@ export function QuizClient() {
         throw new Error(json.error || "შენახვა ვერ მოხერხდა");
       }
       track("quiz_submitted", { id: json.id });
-      router.push(`/result/${json.id}`);
+      router.push("/thank-you");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "მოხდა შეცდომა";
       setError(msg);
