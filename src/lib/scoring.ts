@@ -1,13 +1,15 @@
-// Mini Marketing MRI v2 — score computation + suspected loss point.
+// Mini Marketing MRI v2.1 — score computation with multi-select support.
 import {
   quizQuestions,
-  type QuizOption,
-  type QuizQuestion,
+  Q2_OPTIONS,
+  Q10_OPTIONS,
+  Q10B_UNCERTAINTY_OPTIONS,
   type SuspectedLossPoint,
 } from "./quiz-data";
 import { lossPointPriority, lossPoints, type LossPointResult } from "./bottlenecks";
 
-export type Answers = Record<string, string>;
+export type AnswerValue = string | string[];
+export type Answers = Record<string, AnswerValue>;
 
 export interface ScoreResult {
   lostInvestmentRiskScore: number;
@@ -17,12 +19,15 @@ export interface ScoreResult {
   visibilityLabel: string;
   readinessLabel: string;
   suspectedLossPoint: SuspectedLossPoint;
+  suspectedLossPoints: SuspectedLossPoint[] | "UNKNOWN";
+  primarySuspectedLossPoint: SuspectedLossPoint;
   lossPoint: LossPointResult;
   riskExplanation: string;
   visibilityExplanation: string;
   readinessExplanation: string;
   businessType?: string;
-  salesMethod?: string;
+  salesMethod?: string; // primary
+  salesMethods?: string[]; // all selected
   monthlyPotentialCustomers?: string;
   averageSaleValue?: string;
 }
@@ -82,27 +87,41 @@ export function getReadinessExplanation(score: number): string {
   return "შენი პასუხები აჩვენებს, რომ უფრო ღრმა Marketing MRI-სთვის საკმარისი საწყისი სიგნალი არსებობს.";
 }
 
-function findOption(
-  qid: string,
-  optionKey: string
-): { question: QuizQuestion; option: QuizOption } | null {
-  const q = quizQuestions.find((x) => x.id === qid);
-  if (!q) return null;
-  const o = q.options.find((x) => x.key === optionKey);
-  if (!o) return null;
-  return { question: q, option: o };
+function asArray(v: AnswerValue | undefined): string[] {
+  if (!v) return [];
+  return Array.isArray(v) ? v : [v];
 }
 
-function determineSuspectedLossPoint(answers: Answers): SuspectedLossPoint {
-  // Q10 explicit answer takes priority unless it's "არ ვიცით" (key A).
-  const q10 = answers["q10"];
-  if (q10 && q10 !== "A") {
-    const pair = findOption("q10", q10);
-    if (pair?.option.suspectedLossPoint) return pair.option.suspectedLossPoint;
+function asString(v: AnswerValue | undefined): string | undefined {
+  if (!v) return undefined;
+  return Array.isArray(v) ? v[0] : v;
+}
+
+/**
+ * Determine the primary suspected loss point.
+ * Priority: q10b answer (concrete or uncertainty branch).
+ * Fallback: weak signals from diagnostic questions.
+ */
+function determinePrimaryLossPoint(answers: Answers): SuspectedLossPoint {
+  const q10 = asArray(answers["q10"]);
+  const q10b = asString(answers["q10b"]);
+
+  if (q10b) {
+    const isUnknownBranch = q10.includes("F");
+    const opts = isUnknownBranch ? Q10B_UNCERTAINTY_OPTIONS : Q10_OPTIONS;
+    const opt = opts.find((o) => o.key === q10b);
+    if (opt?.suspectedLossPoint) return opt.suspectedLossPoint;
   }
 
-  // Otherwise: collect candidates from weak signals (answer A or B) on diagnostic questions.
-  const candidates = new Set<SuspectedLossPoint>();
+  // Fallback: derive from concrete q10 selections (if user skipped q10b somehow)
+  for (const lp of lossPointPriority) {
+    for (const key of q10) {
+      const opt = Q10_OPTIONS.find((o) => o.key === key);
+      if (opt?.suspectedLossPoint === lp) return lp;
+    }
+  }
+
+  // Final fallback: weak-signal map across diagnostic questions
   const weaknessMap: Array<{ qid: string; lossPoint: SuspectedLossPoint }> = [
     { qid: "q5", lossPoint: "MONEY_SOURCE" },
     { qid: "q6", lossPoint: "CONTACT_TO_CONVERSATION" },
@@ -113,17 +132,14 @@ function determineSuspectedLossPoint(answers: Answers): SuspectedLossPoint {
     { qid: "q13", lossPoint: "CONTROL_SYSTEM" },
     { qid: "q14", lossPoint: "CONTROL_SYSTEM" },
   ];
-
+  const candidates = new Set<SuspectedLossPoint>();
   for (const { qid, lossPoint } of weaknessMap) {
-    const ans = answers[qid];
+    const ans = asString(answers[qid]);
     if (ans === "A" || ans === "B") candidates.add(lossPoint);
   }
-
   for (const lp of lossPointPriority) {
     if (candidates.has(lp)) return lp;
   }
-
-  // Default fallback.
   return "CONTROL_SYSTEM";
 }
 
@@ -133,18 +149,32 @@ export function computeScore(answers: Answers): ScoreResult {
   let readiness = 40;
 
   let businessType: string | undefined;
-  let salesMethod: string | undefined;
   let monthlyPotentialCustomers: string | undefined;
   let averageSaleValue: string | undefined;
 
+  // ─── Q2 / Q2b: sales methods ────────────────────────────────────────────────
+  const q2Selected = asArray(answers["q2"]);
+  const salesMethods = q2Selected
+    .map((k) => Q2_OPTIONS.find((o) => o.key === k)?.contextValue)
+    .filter((v): v is string => Boolean(v));
+
+  const q2bKey = asString(answers["q2b"]);
+  const salesMethod = q2bKey
+    ? Q2_OPTIONS.find((o) => o.key === q2bKey)?.contextValue
+    : undefined;
+
+  // ─── Single-select questions: apply modifiers + capture context ─────────────
   for (const q of quizQuestions) {
-    const ans = answers[q.id];
+    if (q.type !== "single") continue;
+    // q2b and q10b have their own logic — skip modifier application here
+    if (q.id === "q2b" || q.id === "q10b") continue;
+
+    const ans = asString(answers[q.id]);
     if (!ans) continue;
     const option = q.options.find((o) => o.key === ans);
     if (!option) continue;
 
     if (q.contextField === "business_type") businessType = option.contextValue;
-    if (q.contextField === "sales_method") salesMethod = option.contextValue;
     if (q.contextField === "monthly_potential_customers")
       monthlyPotentialCustomers = option.contextValue;
     if (q.contextField === "average_sale_value")
@@ -157,12 +187,35 @@ export function computeScore(answers: Answers): ScoreResult {
     }
   }
 
+  // ─── Q10 multi-select scoring ───────────────────────────────────────────────
+  const q10Selected = asArray(answers["q10"]);
+  const isUnknownPath = q10Selected.includes("F");
+
+  if (isUnknownPath) {
+    visibility -= 25;
+    risk += 20;
+  } else if (q10Selected.length > 1) {
+    // +5 risk per concrete loss point after the first, max +15
+    const extra = Math.min(15, (q10Selected.length - 1) * 5);
+    risk += extra;
+  }
+
   risk = clamp(risk);
   visibility = clamp(visibility);
   readiness = clamp(readiness);
 
-  const suspectedLossPoint = determineSuspectedLossPoint(answers);
-  const lossPoint = lossPoints[suspectedLossPoint];
+  // ─── Suspected loss points (multi) ──────────────────────────────────────────
+  let suspectedLossPoints: SuspectedLossPoint[] | "UNKNOWN";
+  if (isUnknownPath) {
+    suspectedLossPoints = "UNKNOWN";
+  } else {
+    suspectedLossPoints = q10Selected
+      .map((k) => Q10_OPTIONS.find((o) => o.key === k)?.suspectedLossPoint)
+      .filter((v): v is SuspectedLossPoint => Boolean(v));
+  }
+
+  const primarySuspectedLossPoint = determinePrimaryLossPoint(answers);
+  const lossPoint = lossPoints[primarySuspectedLossPoint];
 
   return {
     lostInvestmentRiskScore: risk,
@@ -171,13 +224,16 @@ export function computeScore(answers: Answers): ScoreResult {
     riskLabel: getRiskLabel(risk),
     visibilityLabel: getVisibilityLabel(visibility),
     readinessLabel: getReadinessLabel(readiness),
-    suspectedLossPoint,
+    suspectedLossPoint: primarySuspectedLossPoint, // backward compat
+    suspectedLossPoints,
+    primarySuspectedLossPoint,
     lossPoint,
     riskExplanation: getRiskExplanation(risk),
     visibilityExplanation: getVisibilityExplanation(visibility),
     readinessExplanation: getReadinessExplanation(readiness),
     businessType,
     salesMethod,
+    salesMethods,
     monthlyPotentialCustomers,
     averageSaleValue,
   };

@@ -1,13 +1,23 @@
 import { z } from "zod";
 import { quizQuestions } from "./quiz-data";
 
+// Build per-question answer schema. Multi-select → array; dynamic-options → string;
+// fixed-options → enum.
 const answerSchema = quizQuestions.reduce(
   (acc, q) => {
-    const allowedKeys = q.options.map((o) => o.key) as [string, ...string[]];
-    acc[q.id] = z.enum(allowedKeys);
+    if (q.type === "multi") {
+      const allowedKeys = q.options.map((o) => o.key) as [string, ...string[]];
+      acc[q.id] = z.array(z.enum(allowedKeys)).min(1, "მონიშნე მინიმუმ ერთი პასუხი");
+    } else if (q.dynamicOptionsFrom || q.branchOnUnknown) {
+      // Dynamic options — answer keys aren't fixed at schema build time.
+      acc[q.id] = z.string().min(1, "აირჩიე პასუხი");
+    } else {
+      const allowedKeys = q.options.map((o) => o.key) as [string, ...string[]];
+      acc[q.id] = z.enum(allowedKeys);
+    }
     return acc;
   },
-  {} as Record<string, z.ZodEnum<[string, ...string[]]>>
+  {} as Record<string, z.ZodTypeAny>
 );
 
 export const submissionSchema = z.object({

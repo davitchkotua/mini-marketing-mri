@@ -30,10 +30,13 @@ export async function POST(req: Request) {
   const insert = {
     name: data.name,
     email: data.email,
+    phone: data.phone || null,
     company: data.company || null,
     answers: data.answers,
     business_type: result.businessType ?? null,
     sales_method: result.salesMethod ?? null,
+    sales_methods: result.salesMethods ?? null,
+    primary_sales_method: result.salesMethod ?? null,
     monthly_potential_customers: result.monthlyPotentialCustomers ?? null,
     average_sale_value: result.averageSaleValue ?? null,
     lost_investment_risk_score: result.lostInvestmentRiskScore,
@@ -43,6 +46,8 @@ export async function POST(req: Request) {
     visibility_label: result.visibilityLabel,
     readiness_label: result.readinessLabel,
     suspected_loss_point: result.suspectedLossPoint,
+    suspected_loss_points: result.suspectedLossPoints ?? null,
+    primary_suspected_loss_point: result.primarySuspectedLossPoint ?? null,
     result_summary: {
       title: result.lossPoint.title,
       diagnosis: result.lossPoint.diagnosis,

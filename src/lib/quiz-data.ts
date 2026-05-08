@@ -1,4 +1,4 @@
-// Mini Marketing MRI v2 — 14 diagnostic questions + lead form
+// Mini Marketing MRI v2.1 — 16 diagnostic questions + lead form
 
 export type SuspectedLossPoint =
   | "BEFORE_CONTACT"
@@ -11,9 +11,10 @@ export type SuspectedLossPoint =
 
 export type ContextField =
   | "business_type"
-  | "sales_method"
   | "monthly_potential_customers"
   | "average_sale_value";
+
+export type QuestionType = "single" | "multi";
 
 export interface ScoreModifier {
   risk?: number;
@@ -33,15 +34,57 @@ export interface QuizQuestion {
   id: string;
   number: number;
   title: string;
+  type: QuestionType;
+  helperText?: string;
   contextField?: ContextField;
   options: QuizOption[];
+  /** When set, options are filtered to only those keys present in the answer of this qid. */
+  dynamicOptionsFrom?: string;
+  /** When the source qid contains the unknownKey, swap to the alternate title + options. */
+  branchOnUnknown?: {
+    qid: string;
+    unknownKey: string;
+    title: string;
+    options: QuizOption[];
+  };
 }
+
+// Sales method options shared between q2 (multi) and q2b (single, filtered)
+export const Q2_OPTIONS: QuizOption[] = [
+  { key: "A", label: "ვებსაიტზე პირდაპირი ყიდვით", contextValue: "website_direct" },
+  { key: "B", label: "ზარით ან შეხვედრით", contextValue: "call_meeting" },
+  { key: "C", label: "Facebook/Instagram შეტყობინებებით", contextValue: "social_dm" },
+  { key: "D", label: "WhatsApp/Viber/Telegram-ით", contextValue: "messenger" },
+  { key: "E", label: "გაყიდვების გუნდით", contextValue: "sales_team" },
+  { key: "F", label: "პარტნიორებით ან რეკომენდაციებით", contextValue: "partners" },
+  { key: "G", label: "სხვა", contextValue: "other" },
+];
+
+// Suspected loss point options (multi) — F = "არ ვიცით"
+export const Q10_OPTIONS: QuizOption[] = [
+  { key: "A", label: "სანამ დაგვიკავშირდება", suspectedLossPoint: "BEFORE_CONTACT" },
+  { key: "B", label: "დაკავშირების შემდეგ, სანამ რეალურ საუბარში გადავა", suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
+  { key: "C", label: "საუბრის შემდეგ, სანამ შეთავაზებას მიიღებს", suspectedLossPoint: "CONVERSATION_TO_OFFER" },
+  { key: "D", label: "შეთავაზების შემდეგ, სანამ გადაწყვეტილებას მიიღებს", suspectedLossPoint: "OFFER_TO_SALE" },
+  { key: "E", label: "განმეორებითი დაკავშირების ეტაპზე", suspectedLossPoint: "FOLLOW_UP" },
+  { key: "F", label: "არ ვიცით" }, // No suspectedLossPoint — branches into uncertainty path
+];
+
+// Q10b uncertainty branch — shown only when Q10 = ["F"]
+export const Q10B_UNCERTAINTY_OPTIONS: QuizOption[] = [
+  { key: "U1", label: "არ ჩანს, რომელი არხი ქმნის რეალურ შემოსავალს", suspectedLossPoint: "MONEY_SOURCE" },
+  { key: "U2", label: "არ ჩანს, რა ხდება დაკავშირების შემდეგ", suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
+  { key: "U3", label: "არ ჩანს, რატომ არ სრულდება შეთავაზებები გაყიდვით", suspectedLossPoint: "OFFER_TO_SALE" },
+  { key: "U4", label: "არ ჩანს, მუშაობს თუ არა განმეორებითი დაკავშირება", suspectedLossPoint: "FOLLOW_UP" },
+  { key: "U5", label: "არ ჩანს, რა უნდა შეიცვალოს პირველ რიგში", suspectedLossPoint: "CONTROL_SYSTEM" },
+];
 
 export const quizQuestions: QuizQuestion[] = [
   {
     id: "q1",
     number: 1,
     title: "რა ტიპის ბიზნესია?",
+    type: "single",
     contextField: "business_type",
     options: [
       { key: "A", label: "სერვისული ბიზნესი", contextValue: "service" },
@@ -56,22 +99,24 @@ export const quizQuestions: QuizQuestion[] = [
   {
     id: "q2",
     number: 2,
-    title: "ძირითადად როგორ ყიდით?",
-    contextField: "sales_method",
-    options: [
-      { key: "A", label: "ვებსაიტზე პირდაპირი ყიდვით", contextValue: "website_direct" },
-      { key: "B", label: "ზარით ან შეხვედრით", contextValue: "call_meeting" },
-      { key: "C", label: "Facebook/Instagram შეტყობინებებით", contextValue: "social_dm" },
-      { key: "D", label: "WhatsApp/Viber/Telegram-ით", contextValue: "messenger" },
-      { key: "E", label: "გაყიდვების გუნდით", contextValue: "sales_team" },
-      { key: "F", label: "პარტნიორებით ან რეკომენდაციებით", contextValue: "partners" },
-      { key: "G", label: "შერეულად", contextValue: "mixed" },
-    ],
+    title: "რომელი გზებით ყიდით? მონიშნე ყველა შესაბამისი.",
+    type: "multi",
+    helperText: "შეგიძლია რამდენიმე პასუხი მონიშნო.",
+    options: Q2_OPTIONS,
+  },
+  {
+    id: "q2b",
+    number: 3,
+    title: "აქედან რომელი გზაა თქვენთვის მთავარი?",
+    type: "single",
+    options: Q2_OPTIONS,
+    dynamicOptionsFrom: "q2",
   },
   {
     id: "q3",
-    number: 3,
+    number: 4,
     title: "თვეში საშუალოდ რამდენი პოტენციური კლიენტი გიკავშირდებათ?",
+    type: "single",
     contextField: "monthly_potential_customers",
     options: [
       { key: "A", label: "ზუსტად არ ვიცით", contextValue: "unknown", modifier: { visibility: -20, readiness: -10, risk: 15 } },
@@ -83,8 +128,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q4",
-    number: 4,
+    number: 5,
     title: "საშუალოდ ერთი გაყიდვა რამდენია?",
+    type: "single",
     contextField: "average_sale_value",
     options: [
       { key: "A", label: "ზუსტად არ ვიცით", contextValue: "unknown", modifier: { visibility: -20, readiness: -5, risk: 10 } },
@@ -97,8 +143,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q5",
-    number: 5,
+    number: 6,
     title: "იცით, რომელი არხიდან მოდის ყველაზე ხარისხიანი პოტენციური კლიენტი?",
+    type: "single",
     options: [
       { key: "A", label: "არა", modifier: { visibility: -25, risk: 20, readiness: -10 }, suspectedLossPoint: "MONEY_SOURCE" },
       { key: "B", label: "ზოგადად ვხვდებით", modifier: { visibility: -10, risk: 10 } },
@@ -109,8 +156,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q6",
-    number: 6,
+    number: 7,
     title: "იმ ადამიანებიდან, ვინც გიკავშირდებათ, დაახლოებით რამდენი გადადის რეალურ საუბარში?",
+    type: "single",
     options: [
       { key: "A", label: "არ ვიცით", modifier: { visibility: -20, risk: 20, readiness: -5 }, suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
       { key: "B", label: "ძალიან ცოტა", modifier: { risk: 25 }, suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
@@ -121,8 +169,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q7",
-    number: 7,
+    number: 8,
     title: "საუბრის შემდეგ რამდენ ადამიანს უგზავნით კონკრეტულ შეთავაზებას?",
+    type: "single",
     options: [
       { key: "A", label: "არ ვიცით", modifier: { visibility: -20, risk: 20, readiness: -5 }, suspectedLossPoint: "CONVERSATION_TO_OFFER" },
       { key: "B", label: "ძალიან ცოტას", modifier: { risk: 25 }, suspectedLossPoint: "CONVERSATION_TO_OFFER" },
@@ -133,8 +182,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q8",
-    number: 8,
+    number: 9,
     title: "გაგზავნილი შეთავაზებებიდან დაახლოებით რამდენი სრულდება გაყიდვით?",
+    type: "single",
     options: [
       { key: "A", label: "არ ვიცით", modifier: { visibility: -25, risk: 20, readiness: -5 }, suspectedLossPoint: "OFFER_TO_SALE" },
       { key: "B", label: "10%-ზე ნაკლები", modifier: { risk: 30 }, suspectedLossPoint: "OFFER_TO_SALE" },
@@ -145,8 +195,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q9",
-    number: 9,
+    number: 10,
     title: "ბოლო 10 დაკარგული პოტენციური კლიენტიდან იცით, რატომ დაიკარგნენ?",
+    type: "single",
     options: [
       { key: "A", label: "არა", modifier: { visibility: -30, risk: 25, readiness: -10 } },
       { key: "B", label: "ზოგადად ვხვდებით, მაგრამ არ გვაქვს ჩაწერილი", modifier: { visibility: -15, risk: 15 } },
@@ -157,21 +208,31 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q10",
-    number: 10,
-    title: "სად გგონია, ყველაზე ხშირად იკარგება პოტენციური კლიენტი?",
-    options: [
-      { key: "A", label: "არ ვიცით", modifier: { visibility: -25, risk: 20 } },
-      { key: "B", label: "სანამ დაგვიკავშირდება", suspectedLossPoint: "BEFORE_CONTACT" },
-      { key: "C", label: "დაკავშირების შემდეგ, სანამ რეალურ საუბარში გადავა", suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
-      { key: "D", label: "საუბრის შემდეგ, სანამ შეთავაზებას მიიღებს", suspectedLossPoint: "CONVERSATION_TO_OFFER" },
-      { key: "E", label: "შეთავაზების შემდეგ, სანამ გადაწყვეტილებას მიიღებს", suspectedLossPoint: "OFFER_TO_SALE" },
-      { key: "F", label: "განმეორებითი დაკავშირების ეტაპზე", suspectedLossPoint: "FOLLOW_UP" },
-    ],
+    number: 11,
+    title: "სად იკარგებიან პოტენციური კლიენტები? მონიშნე ყველა საეჭვო ეტაპი.",
+    type: "multi",
+    helperText: "შეგიძლია რამდენიმე პასუხი მონიშნო.",
+    options: Q10_OPTIONS,
+  },
+  {
+    id: "q10b",
+    number: 12,
+    title: "აქედან რომელი გგონია ყველაზე დიდი პრობლემა ახლა?",
+    type: "single",
+    options: Q10_OPTIONS,
+    dynamicOptionsFrom: "q10",
+    branchOnUnknown: {
+      qid: "q10",
+      unknownKey: "F",
+      title: "სად გგონია, ყველაზე დიდი გაურკვევლობაა?",
+      options: Q10B_UNCERTAINTY_OPTIONS,
+    },
   },
   {
     id: "q11",
-    number: 11,
+    number: 13,
     title: "გაქვთ თუ არა განმეორებითი დაკავშირების პროცესი?",
+    type: "single",
     options: [
       { key: "A", label: "არა", modifier: { risk: 30, visibility: -15, readiness: -5 }, suspectedLossPoint: "FOLLOW_UP" },
       { key: "B", label: "ზოგჯერ ვწერთ ან ვურეკავთ", modifier: { risk: 20 }, suspectedLossPoint: "FOLLOW_UP" },
@@ -182,8 +243,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q12",
-    number: 12,
+    number: 14,
     title: "კვირაში ერთხელ მაინც უყურებთ მარკეტინგისა და გაყიდვების ძირითად ციფრებს?",
+    type: "single",
     options: [
       { key: "A", label: "არა", modifier: { visibility: -20, risk: 20, readiness: -10 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "B", label: "იშვიათად", modifier: { visibility: -10, risk: 10 }, suspectedLossPoint: "CONTROL_SYSTEM" },
@@ -194,8 +256,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q13",
-    number: 13,
+    number: 15,
     title: "გაყიდვამდე გზის თითოეულ ეტაპზე იცით, ვინ არის პასუხისმგებელი?",
+    type: "single",
     options: [
       { key: "A", label: "არა", modifier: { risk: 20, visibility: -15 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "B", label: "ზოგადად ვიცით", modifier: { risk: 10 } },
@@ -206,8 +269,9 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q14",
-    number: 14,
+    number: 16,
     title: "როცა შედეგი არ მოდის, იცით პირველ რიგში რას ცვლით?",
+    type: "single",
     options: [
       { key: "A", label: "არა, ძირითადად ახალ იდეას ვცდით", modifier: { visibility: -25, risk: 25, readiness: -10 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "B", label: "ზოგადად ვხვდებით", modifier: { visibility: -10, risk: 10 } },

@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { quizQuestions } from "@/lib/quiz-data";
+import { quizQuestions, type QuizOption, type QuizQuestion } from "@/lib/quiz-data";
 import { track } from "@/lib/analytics";
 import { ProgressBar } from "./ProgressBar";
 
-type Answers = Record<string, string>;
+type AnswerValue = string | string[];
+type Answers = Record<string, AnswerValue>;
+
 type Lead = {
   name: string;
   email: string;
@@ -24,6 +26,49 @@ const emptyLead: Lead = {
 };
 
 const totalSteps = quizQuestions.length + 1; // questions + lead form
+
+/** Mutual-exclusion key for q10 — selecting "F" (არ ვიცით) clears all others. */
+const Q10_UNKNOWN_KEY = "F";
+
+/**
+ * Resolve which options to render and which title to show, accounting for
+ * dynamic option filtering (q2b ← q2) and unknown-branch swap (q10b ← q10).
+ */
+function resolveQuestion(q: QuizQuestion, answers: Answers): {
+  title: string;
+  options: QuizOption[];
+  helperText?: string;
+} {
+  // Branched on unknown — swap title + options
+  if (q.branchOnUnknown) {
+    const sourceAns = answers[q.branchOnUnknown.qid];
+    const arr = Array.isArray(sourceAns) ? sourceAns : sourceAns ? [sourceAns] : [];
+    if (arr.includes(q.branchOnUnknown.unknownKey)) {
+      return {
+        title: q.branchOnUnknown.title,
+        options: q.branchOnUnknown.options,
+        helperText: q.helperText,
+      };
+    }
+  }
+
+  // Dynamic options from a previous multi-select answer
+  if (q.dynamicOptionsFrom) {
+    const sourceAns = answers[q.dynamicOptionsFrom];
+    const selectedKeys = Array.isArray(sourceAns)
+      ? sourceAns
+      : sourceAns
+      ? [sourceAns]
+      : [];
+    return {
+      title: q.title,
+      options: q.options.filter((o) => selectedKeys.includes(o.key)),
+      helperText: q.helperText,
+    };
+  }
+
+  return { title: q.title, options: q.options, helperText: q.helperText };
+}
 
 export function QuizClient() {
   const router = useRouter();
@@ -52,13 +97,26 @@ export function QuizClient() {
 
   const isQuestionStep = step < quizQuestions.length;
   const currentQuestion = isQuestionStep ? quizQuestions[step] : null;
-  const currentAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
+
+  const resolved = useMemo(
+    () => (currentQuestion ? resolveQuestion(currentQuestion, answers) : null),
+    [currentQuestion, answers]
+  );
 
   function next() {
     if (isQuestionStep && currentQuestion) {
-      if (!currentAnswer) {
-        setError("გთხოვ, წინ გადასასვლელად პასუხი აირჩიო.");
-        return;
+      const ans = answers[currentQuestion.id];
+      if (currentQuestion.type === "multi") {
+        const arr = Array.isArray(ans) ? ans : [];
+        if (arr.length === 0) {
+          setError("მონიშნე მინიმუმ ერთი პასუხი.");
+          return;
+        }
+      } else {
+        if (!ans || (Array.isArray(ans) && ans.length === 0)) {
+          setError("გთხოვ, წინ გადასასვლელად პასუხი აირჩიო.");
+          return;
+        }
       }
       track("quiz_step_completed", { step: step + 1, qid: currentQuestion.id });
     }
@@ -71,9 +129,40 @@ export function QuizClient() {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  function selectAnswer(optionKey: string) {
+  function selectSingle(optionKey: string) {
     if (!currentQuestion) return;
     setAnswers((a) => ({ ...a, [currentQuestion.id]: optionKey }));
+    setError(null);
+  }
+
+  function toggleMulti(optionKey: string) {
+    if (!currentQuestion) return;
+    const qid = currentQuestion.id;
+    const isQ10 = qid === "q10";
+
+    setAnswers((a) => {
+      const current = Array.isArray(a[qid]) ? (a[qid] as string[]) : [];
+      let nextArr: string[];
+
+      if (isQ10 && optionKey === Q10_UNKNOWN_KEY) {
+        // Selecting "არ ვიცით" → keep only it OR deselect
+        nextArr = current.includes(optionKey) ? [] : [optionKey];
+      } else if (isQ10 && current.includes(Q10_UNKNOWN_KEY)) {
+        // Adding any other option → drop "არ ვიცით"
+        nextArr = [optionKey];
+      } else {
+        // Standard toggle
+        nextArr = current.includes(optionKey)
+          ? current.filter((k) => k !== optionKey)
+          : [...current, optionKey];
+      }
+
+      const next: Answers = { ...a, [qid]: nextArr };
+      // Clear dependent answers when source changes
+      if (qid === "q2") delete next["q2b"];
+      if (qid === "q10") delete next["q10b"];
+      return next;
+    });
     setError(null);
   }
 
@@ -116,29 +205,64 @@ export function QuizClient() {
       <ProgressBar current={step + 1} total={totalSteps} />
 
       <div className="mt-8 card">
-        {currentQuestion ? (
+        {currentQuestion && resolved ? (
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-ink-muted">
               კითხვა {currentQuestion.number} / {quizQuestions.length}
             </p>
             <h2 className="mt-2 text-xl md:text-2xl font-semibold leading-snug">
-              {currentQuestion.title}
+              {resolved.title}
             </h2>
+            {resolved.helperText && (
+              <p className="mt-2 text-sm text-ink-muted">{resolved.helperText}</p>
+            )}
             <ul className="mt-6 space-y-2">
-              {currentQuestion.options.map((o) => {
-                const selected = currentAnswer === o.key;
+              {resolved.options.map((o) => {
+                const ans = answers[currentQuestion.id];
+                const selected =
+                  currentQuestion.type === "multi"
+                    ? Array.isArray(ans) && ans.includes(o.key)
+                    : ans === o.key;
+                const isMulti = currentQuestion.type === "multi";
                 return (
                   <li key={o.key}>
                     <button
                       type="button"
-                      onClick={() => selectAnswer(o.key)}
+                      onClick={() =>
+                        isMulti ? toggleMulti(o.key) : selectSingle(o.key)
+                      }
                       className={[
-                        "w-full text-left rounded-lg border px-4 py-3 transition",
+                        "w-full text-left rounded-lg border px-4 py-3 transition flex items-start gap-3",
                         selected
                           ? "border-accent bg-accent text-[#170303] font-medium"
                           : "border-line bg-[#1f0404] text-ink-soft hover:border-ink/60 hover:text-ink",
                       ].join(" ")}
                     >
+                      {isMulti && (
+                        <span
+                          aria-hidden
+                          className={[
+                            "mt-[3px] h-4 w-4 shrink-0 rounded border-2 flex items-center justify-center transition",
+                            selected
+                              ? "border-[#170303] bg-[#170303]"
+                              : "border-ink-muted bg-transparent",
+                          ].join(" ")}
+                        >
+                          {selected && (
+                            <svg
+                              viewBox="0 0 12 12"
+                              className="h-3 w-3 text-accent"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M2.5 6.5l2.5 2.5 4.5-5" />
+                            </svg>
+                          )}
+                        </span>
+                      )}
                       <span className="block text-sm leading-relaxed">{o.label}</span>
                     </button>
                   </li>
@@ -264,31 +388,6 @@ function Field(props: {
         onChange={(e) => props.onChange(e.target.value)}
       />
       {props.error && <p className="err">{props.error}</p>}
-    </div>
-  );
-}
-
-function SelectField(props: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-}) {
-  return (
-    <div>
-      <label className="label">{props.label}</label>
-      <select
-        className="field"
-        value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
-      >
-        <option value="">— აირჩიე —</option>
-        {props.options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import type { ScoreResult } from "./scoring";
-import { quizQuestions } from "./quiz-data";
+import { quizQuestions, Q10B_UNCERTAINTY_OPTIONS } from "./quiz-data";
 
 interface SendArgs {
   to: string;
@@ -148,7 +148,7 @@ interface AdminArgs {
   email: string;
   phone: string;
   company: string;
-  answers: Record<string, string>;
+  answers: Record<string, string | string[]>;
   result: ScoreResult;
 }
 
@@ -160,14 +160,37 @@ export async function sendAdminNotification(args: AdminArgs) {
   const resend = new Resend(apiKey);
   const { name, email, phone, company, answers, result } = args;
 
-  // Build answers table rows
+  // Resolve a key (or array of keys) to a human-readable label.
+  const labelFor = (q: typeof quizQuestions[number], key: string): string => {
+    // q10b uncertainty branch uses U1..U5 keys from a separate option pool.
+    if (q.id === "q10b" && key.startsWith("U")) {
+      return Q10B_UNCERTAINTY_OPTIONS.find((o) => o.key === key)?.label ?? key;
+    }
+    return q.options.find((o) => o.key === key)?.label ?? key;
+  };
+
+  // Build answers table rows. q10b's effective title may be the branched one.
   const answerRows = quizQuestions
     .map((q) => {
-      const selectedKey = answers[q.id];
-      const selectedOption = q.options.find((o) => o.key === selectedKey);
+      const value = answers[q.id];
+      let displayValue = "—";
+      if (Array.isArray(value)) {
+        displayValue = value.map((k) => labelFor(q, k)).join(" · ");
+      } else if (typeof value === "string" && value) {
+        displayValue = labelFor(q, value);
+      }
+      // Use the branched title for q10b when q10 = unknown
+      let titleForRow = q.title;
+      if (q.branchOnUnknown) {
+        const src = answers[q.branchOnUnknown.qid];
+        const arr = Array.isArray(src) ? src : src ? [src] : [];
+        if (arr.includes(q.branchOnUnknown.unknownKey)) {
+          titleForRow = q.branchOnUnknown.title;
+        }
+      }
       return `<tr>
-        <td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#9ca3af;width:45%">${escape(q.title)}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#ffffff">${escape(selectedOption?.label ?? selectedKey ?? "—")}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#9ca3af;width:45%">${escape(titleForRow)}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#ffffff">${escape(displayValue)}</td>
       </tr>`;
     })
     .join("");
