@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { submissionSchema } from "@/lib/validation";
 import { computeScore } from "@/lib/scoring";
 import { getServerSupabase } from "@/lib/supabase";
-import { sendDiagnosticEmail } from "@/lib/email";
+import { sendDiagnosticEmail, sendAdminNotification } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,10 +31,6 @@ export async function POST(req: Request) {
     name: data.name,
     email: data.email,
     company: data.company || null,
-    role: data.role || null,
-    website: data.website || null,
-    revenue_range: data.revenue_range || null,
-    team_size: data.team_size || null,
     answers: data.answers,
     business_type: result.businessType ?? null,
     sales_method: result.salesMethod ?? null,
@@ -84,6 +80,19 @@ export async function POST(req: Request) {
       .eq("id", row.id);
   } catch (e) {
     console.error("[quiz/submit] email send failed", e);
+  }
+
+  try {
+    await sendAdminNotification({
+      name: data.name,
+      email: data.email,
+      phone: data.phone || "",
+      company: data.company || "",
+      answers: data.answers,
+      result,
+    });
+  } catch (e) {
+    console.error("[quiz/submit] admin notification failed", e);
   }
 
   return NextResponse.json({ id: row.id });

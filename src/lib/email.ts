@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import type { ScoreResult } from "./scoring";
+import { quizQuestions } from "./quiz-data";
 
 interface SendArgs {
   to: string;
@@ -138,4 +139,93 @@ function escape(s: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+// ─── Admin notification ───────────────────────────────────────────────────────
+
+interface AdminArgs {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  answers: Record<string, string>;
+  result: ScoreResult;
+}
+
+export async function sendAdminNotification(args: AdminArgs) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) return;
+
+  const resend = new Resend(apiKey);
+  const { name, email, phone, company, answers, result } = args;
+
+  // Build answers table rows
+  const answerRows = quizQuestions
+    .map((q) => {
+      const selectedKey = answers[q.id];
+      const selectedOption = q.options.find((o) => o.key === selectedKey);
+      return `<tr>
+        <td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#9ca3af;width:45%">${escape(q.title)}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#ffffff">${escape(selectedOption?.label ?? selectedKey ?? "—")}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const html = `<!doctype html>
+<html lang="ka"><body style="margin:0;background:#0f0f0f;font-family:Inter,system-ui,sans-serif;color:#fff;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;background:#0f0f0f;">
+    <tr><td align="center">
+      <table role="presentation" width="620" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:28px;">
+        <tr><td>
+          <p style="margin:0 0 4px 0;font-size:11px;color:#6b7280;letter-spacing:.16em;text-transform:uppercase;">Mini Marketing MRI — ახალი შევსება</p>
+          <h1 style="margin:0 0 20px 0;font-size:20px;color:#fff;">${escape(name)}</h1>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #2a2a2a;border-radius:8px;margin:0 0 24px 0;">
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #2a2a2a;">
+              <span style="font-size:12px;color:#9ca3af;">ელ-ფოსტა</span><br>
+              <a href="mailto:${escape(email)}" style="font-size:15px;color:#FFB21A;text-decoration:none;">${escape(email)}</a>
+            </td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #2a2a2a;">
+              <span style="font-size:12px;color:#9ca3af;">ტელეფონი</span><br>
+              <span style="font-size:15px;color:#fff;">${escape(phone || "—")}</span>
+            </td></tr>
+            <tr><td style="padding:10px 14px;">
+              <span style="font-size:12px;color:#9ca3af;">კომპანია</span><br>
+              <span style="font-size:15px;color:#fff;">${escape(company || "—")}</span>
+            </td></tr>
+          </table>
+
+          <p style="margin:0 0 8px 0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.14em;">სკორები</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #2a2a2a;border-radius:8px;margin:0 0 24px 0;">
+            <tr><td style="padding:8px 14px;border-bottom:1px solid #2a2a2a;font-size:13px;">
+              დაკარგული ინვ. რისკი: <strong style="color:#FFB21A;">${result.lostInvestmentRiskScore}% · ${escape(result.riskLabel)}</strong>
+            </td></tr>
+            <tr><td style="padding:8px 14px;border-bottom:1px solid #2a2a2a;font-size:13px;">
+              პრობლემის ხილვადობა: <strong>${result.problemVisibilityScore}% · ${escape(result.visibilityLabel)}</strong>
+            </td></tr>
+            <tr><td style="padding:8px 14px;border-bottom:1px solid #2a2a2a;font-size:13px;">
+              MRI მზადყოფნა: <strong>${result.mriReadinessScore}% · ${escape(result.readinessLabel)}</strong>
+            </td></tr>
+            <tr><td style="padding:8px 14px;font-size:13px;">
+              პირველი ზონა: <strong style="color:#FFB21A;">${escape(result.lossPoint.title)}</strong>
+            </td></tr>
+          </table>
+
+          <p style="margin:0 0 8px 0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.14em;">პასუხები</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #2a2a2a;border-radius:8px;margin:0 0 16px 0;">
+            ${answerRows}
+          </table>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  return resend.emails.send({
+    from,
+    to: "hello@davitchkotua.com",
+    subject: "mini Marketing MRI კლიენტი",
+    html,
+  });
 }

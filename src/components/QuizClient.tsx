@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  quizQuestions,
-  revenueRanges,
-  teamSizeRanges,
-} from "@/lib/quiz-data";
+import { quizQuestions } from "@/lib/quiz-data";
 import { track } from "@/lib/analytics";
 import { ProgressBar } from "./ProgressBar";
 
@@ -14,22 +10,16 @@ type Answers = Record<string, string>;
 type Lead = {
   name: string;
   email: string;
+  phone: string;
   company: string;
-  role: string;
-  website: string;
-  revenue_range: string;
-  team_size: string;
   consent: boolean;
 };
 
 const emptyLead: Lead = {
   name: "",
   email: "",
+  phone: "",
   company: "",
-  role: "",
-  website: "",
-  revenue_range: "",
-  team_size: "",
   consent: false,
 };
 
@@ -184,32 +174,15 @@ export function QuizClient() {
                 error={leadErrors.email}
               />
               <Field
-                label="კომპანია (არასავალდებულო)"
+                label="ტელეფონის ნომერი (არასავალდებულო)"
+                type="tel"
+                value={lead.phone}
+                onChange={(v) => setLead({ ...lead, phone: v })}
+              />
+              <Field
+                label="კომპანიის სახელწოდება (არასავალდებულო)"
                 value={lead.company}
                 onChange={(v) => setLead({ ...lead, company: v })}
-              />
-              <Field
-                label="შენი როლი (არასავალდებულო)"
-                placeholder="Founder, CEO, Marketing Lead..."
-                value={lead.role}
-                onChange={(v) => setLead({ ...lead, role: v })}
-              />
-              <Field
-                label="ვებსაიტი ან სოც. გვერდი (არასავალდებულო)"
-                value={lead.website}
-                onChange={(v) => setLead({ ...lead, website: v })}
-              />
-              <SelectField
-                label="თვიური შემოსავლის დიაპაზონი (არასავალდებულო)"
-                value={lead.revenue_range}
-                onChange={(v) => setLead({ ...lead, revenue_range: v })}
-                options={revenueRanges}
-              />
-              <SelectField
-                label="გუნდის ზომა (არასავალდებულო)"
-                value={lead.team_size}
-                onChange={(v) => setLead({ ...lead, team_size: v })}
-                options={teamSizeRanges}
               />
 
               <label className="mt-2 flex items-start gap-3 text-sm text-ink-soft">
