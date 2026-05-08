@@ -21,7 +21,7 @@ export const bottleneckPriority: DimensionKey[] = [
 export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   money_clarity: {
     key: "money_clarity",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს ფულის სიცხადე",
+    title: "პირველი შესამოწმებელი ზონა: ფულის სიცხადე",
     diagnosis:
       "შესაძლოა, ბიზნესი ზუსტად ვერ ხედავს, რომელი შეთავაზება, არხი ან მომხმარებლის სეგმენტი ქმნის რეალურ ფულს.",
     symptoms: [
@@ -34,7 +34,7 @@ export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   },
   offer_clarity: {
     key: "offer_clarity",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს შეთავაზების სიცხადე",
+    title: "პირველი შესამოწმებელი ზონა: შეთავაზების სიცხადე",
     diagnosis:
       "შესაძლოა, პრობლემა არა traffic-ში, არამედ შეთავაზების სიმკვეთრეშია.",
     symptoms: [
@@ -47,7 +47,7 @@ export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   },
   icp_clarity: {
     key: "icp_clarity",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს იდეალური მომხმარებლის სიცხადე",
+    title: "პირველი შესამოწმებელი ზონა: იდეალური მომხმარებელი",
     diagnosis:
       "შესაძლოა, მარკეტინგი ზედმეტად ფართო აუდიტორიას ელაპარაკება.",
     symptoms: [
@@ -59,7 +59,7 @@ export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   },
   funnel_visibility: {
     key: "funnel_visibility",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს გაყიდვის გზის ხილვადობა",
+    title: "პირველი შესამოწმებელი ზონა: გაყიდვამდე გზა",
     diagnosis: "შესაძლოა არ ჩანს სად გადადის ადამიანი awareness-დან sale-მდე.",
     symptoms: [
       "არხები ცალკე მუშაობს",
@@ -70,7 +70,7 @@ export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   },
   conversion_evidence: {
     key: "conversion_evidence",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს კონვერსიის მტკიცებულება",
+    title: "პირველი შესამოწმებელი ზონა: გაყიდვის დაკარგვის წერტილები",
     diagnosis:
       "შესაძლოა, გაქვთ მოთხოვნა ან ინტერესი, მაგრამ არ იცით სად იკარგება გაყიდვა.",
     symptoms: [
@@ -82,7 +82,7 @@ export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   },
   execution_rhythm: {
     key: "execution_rhythm",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს შესრულების რიტმი",
+    title: "პირველი შესამოწმებელი ზონა: შესრულების რიტმი",
     diagnosis:
       "შესაძლოა, პრობლემა სტრატეგიაში კი არა, მარკეტინგის მართვის რიტმშია.",
     symptoms: [
@@ -95,7 +95,7 @@ export const bottlenecks: Record<DimensionKey, BottleneckResult> = {
   },
   decision_system: {
     key: "decision_system",
-    title: "შენი მთავარი სუსტი წერტილი შეიძლება იყოს გადაწყვეტილების სისტემა",
+    title: "პირველი შესამოწმებელი ზონა: გადაწყვეტილების მიღება",
     diagnosis:
       "შესაძლოა, მარკეტინგული გადაწყვეტილებები ძალიან ბევრ ინტუიციაზეა დამოკიდებული.",
     symptoms: [

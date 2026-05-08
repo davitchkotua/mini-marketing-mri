@@ -12,8 +12,8 @@ const answersShape = quizQuestions.reduce(
 export const submissionSchema = z.object({
   name: z.string().trim().min(1, "სახელი აუცილებელია"),
   email: z.string().trim().email("შეიყვანე ვალიდური ელფოსტა"),
-  company: z.string().trim().min(1, "კომპანიის სახელი აუცილებელია"),
-  role: z.string().trim().min(1, "შენი როლი აუცილებელია"),
+  company: z.string().trim().optional().or(z.literal("")),
+  role: z.string().trim().optional().or(z.literal("")),
   website: z.string().trim().optional().or(z.literal("")),
   revenue_range: z.string().trim().optional().or(z.literal("")),
   team_size: z.string().trim().optional().or(z.literal("")),

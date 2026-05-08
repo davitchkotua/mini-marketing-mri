@@ -89,8 +89,6 @@ export function QuizClient() {
     if (!lead.email.trim()) errs.email = "ელფოსტა აუცილებელია";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email))
       errs.email = "შეიყვანე ვალიდური ელფოსტა";
-    if (!lead.company.trim()) errs.company = "კომპანიის სახელი აუცილებელია";
-    if (!lead.role.trim()) errs.role = "შენი როლი აუცილებელია";
     if (!lead.consent) errs.consent = "თანხმობა აუცილებელია";
     setLeadErrors(errs);
     return Object.keys(errs).length === 0;
@@ -163,7 +161,7 @@ export function QuizClient() {
               სად გამოგიგზავნოთ შენი საწყისი დიაგნოსტიკა?
             </h2>
             <p className="mt-2 text-sm text-ink-muted">
-              ამ ინფორმაციას ვიყენებთ მხოლოდ შენი შედეგისა და შესაბამისი რეკომენდაციების გამოსაგზავნად.
+              ამ ინფორმაციას ვიყენებთ მხოლოდ შენი შედეგის გამოსაგზავნად და რეკომენდაციის უკეთ მოსარგებად.
             </p>
 
             <div className="mt-6 grid gap-4">
@@ -181,17 +179,15 @@ export function QuizClient() {
                 error={leadErrors.email}
               />
               <Field
-                label="კომპანია *"
+                label="კომპანია (არასავალდებულო)"
                 value={lead.company}
                 onChange={(v) => setLead({ ...lead, company: v })}
-                error={leadErrors.company}
               />
               <Field
-                label="შენი როლი *"
+                label="შენი როლი (არასავალდებულო)"
                 placeholder="Founder, CEO, Marketing Lead..."
                 value={lead.role}
                 onChange={(v) => setLead({ ...lead, role: v })}
-                error={leadErrors.role}
               />
               <Field
                 label="ვებსაიტი ან სოც. გვერდი (არასავალდებულო)"
@@ -234,14 +230,18 @@ export function QuizClient() {
         )}
 
         <div className="mt-8 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={back}
-            disabled={step === 0 || submitting}
-            className="btn-ghost disabled:opacity-40"
-          >
-            უკან
-          </button>
+          {step > 0 ? (
+            <button
+              type="button"
+              onClick={back}
+              disabled={submitting}
+              className="btn-ghost"
+            >
+              ← უკან
+            </button>
+          ) : (
+            <span />
+          )}
           {isQuestionStep ? (
             <button type="button" onClick={next} className="btn-primary">
               {step === quizQuestions.length - 1 ? "საკონტაქტოზე გადასვლა" : "შემდეგი"}

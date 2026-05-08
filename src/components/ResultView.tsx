@@ -66,9 +66,12 @@ export function ResultView(props: ResultProps) {
 
       <div className="mt-6 rounded-xl border border-accent/30 bg-accent/10 p-6">
         <p className="text-xs uppercase tracking-[0.18em] text-accent/70">
-          რეკომენდაცია
+          რეკომენდებული შემდეგი ნაბიჯი
         </p>
         <p className="mt-2 leading-relaxed text-ink">{props.recommendedCopy}</p>
+        <p className="mt-3 leading-relaxed text-ink-soft">
+          თუ გინდა გავიგოთ, ეს პრობლემა რეალურად სად იწყება და ღირს თუ არა სრული Marketing MRI, დაჯავშნე მოკლე დიაგნოსტიკური ზარი.
+        </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <a
             href="https://www.davitchkotua.com/#book-call"
@@ -77,13 +80,21 @@ export function ResultView(props: ResultProps) {
             onClick={() => track("call_cta_clicked", { id: props.id })}
             className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-[#170303] hover:bg-accent-hover transition"
           >
-            დაჯავშნე ზარი
+            დაჯავშნე დიაგნოსტიკური ზარი
+          </a>
+          <a
+            href="https://www.davitchkotua.com/#book-call"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-lg border border-line px-5 py-3 text-base font-medium text-ink-soft hover:border-ink/60 hover:text-ink transition"
+          >
+            მინდა სრული Marketing MRI-ის განხილვა
           </a>
         </div>
       </div>
 
       <p className="mt-6 text-sm text-ink-muted">
-        ეს არის საწყისი მსუბუქი დიაგნოსტიკა და არა სრული Marketing MRI. დეტალური შედეგი ასევე გაგზავნილია შენს ელფოსტაზე.
+        ეს არის საწყისი დიაგნოსტიკა და არა სრული Marketing MRI. შედეგი ასევე გაგზავნილია შენს ელფოსტაზე.
       </p>
     </div>
   );
