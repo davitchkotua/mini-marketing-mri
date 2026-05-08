@@ -2,16 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { quizQuestions, type DimensionKey } from "@/lib/quiz-data";
+import {
+  quizQuestions,
+  revenueRanges,
+  teamSizeRanges,
+} from "@/lib/quiz-data";
 import { track } from "@/lib/analytics";
 import { ProgressBar } from "./ProgressBar";
 
-type Answers = Partial<Record<DimensionKey, number>>;
+type Answers = Record<string, string>;
 type Lead = {
   name: string;
   email: string;
   company: string;
-  phone: string;
+  role: string;
+  website: string;
+  revenue_range: string;
+  team_size: string;
   consent: boolean;
 };
 
@@ -19,7 +26,10 @@ const emptyLead: Lead = {
   name: "",
   email: "",
   company: "",
-  phone: "",
+  role: "",
+  website: "",
+  revenue_range: "",
+  team_size: "",
   consent: false,
 };
 
@@ -52,15 +62,15 @@ export function QuizClient() {
 
   const isQuestionStep = step < quizQuestions.length;
   const currentQuestion = isQuestionStep ? quizQuestions[step] : null;
-  const currentAnswer = currentQuestion ? answers[currentQuestion.key] : undefined;
+  const currentAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
 
   function next() {
     if (isQuestionStep && currentQuestion) {
-      if (typeof currentAnswer !== "number") {
+      if (!currentAnswer) {
         setError("გთხოვ, წინ გადასასვლელად პასუხი აირჩიო.");
         return;
       }
-      track("quiz_step_completed", { step: step + 1, key: currentQuestion.key });
+      track("quiz_step_completed", { step: step + 1, qid: currentQuestion.id });
     }
     setError(null);
     setStep((s) => Math.min(s + 1, totalSteps - 1));
@@ -71,9 +81,9 @@ export function QuizClient() {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  function selectAnswer(score: number) {
+  function selectAnswer(optionKey: string) {
     if (!currentQuestion) return;
-    setAnswers((a) => ({ ...a, [currentQuestion.key]: score }));
+    setAnswers((a) => ({ ...a, [currentQuestion.id]: optionKey }));
     setError(null);
   }
 
@@ -103,7 +113,7 @@ export function QuizClient() {
         throw new Error(json.error || "შენახვა ვერ მოხერხდა");
       }
       track("quiz_submitted", { id: json.id });
-      router.push("/thank-you");
+      router.push(`/result/${json.id}`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "მოხდა შეცდომა";
       setError(msg);
@@ -119,19 +129,19 @@ export function QuizClient() {
         {currentQuestion ? (
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-ink-muted">
-              {currentQuestion.dimensionLabel}
+              კითხვა {currentQuestion.number} / {quizQuestions.length}
             </p>
             <h2 className="mt-2 text-xl md:text-2xl font-semibold leading-snug">
-              {currentQuestion.question}
+              {currentQuestion.title}
             </h2>
             <ul className="mt-6 space-y-2">
-              {currentQuestion.answers.map((a) => {
-                const selected = currentAnswer === a.score;
+              {currentQuestion.options.map((o) => {
+                const selected = currentAnswer === o.key;
                 return (
-                  <li key={a.score}>
+                  <li key={o.key}>
                     <button
                       type="button"
-                      onClick={() => selectAnswer(a.score)}
+                      onClick={() => selectAnswer(o.key)}
                       className={[
                         "w-full text-left rounded-lg border px-4 py-3 transition",
                         selected
@@ -139,7 +149,7 @@ export function QuizClient() {
                           : "border-line bg-[#1f0404] text-ink-soft hover:border-ink/60 hover:text-ink",
                       ].join(" ")}
                     >
-                      <span className="block text-sm leading-relaxed">{a.label}</span>
+                      <span className="block text-sm leading-relaxed">{o.label}</span>
                     </button>
                   </li>
                 );
@@ -152,10 +162,11 @@ export function QuizClient() {
               შენი საკონტაქტო
             </p>
             <h2 className="mt-2 text-xl md:text-2xl font-semibold leading-snug">
-              სად გამოგიგზავნოთ შენი საწყისი დიაგნოსტიკა?
+              სად გამოგიგზავნოთ მინი ანგარიში?
             </h2>
             <p className="mt-2 text-sm text-ink-muted">
-              ამ ინფორმაციას ვიყენებთ მხოლოდ შენი შედეგის გამოსაგზავნად და რეკომენდაციის უკეთ მოსარგებად.
+              შედეგს გაჩვენებთ ეკრანზეც და გამოგიგზავნით ელფოსტაზეც, რომ შემდეგ
+              დაბრუნება შეძლოთ.
             </p>
 
             <div className="mt-6 grid gap-4">
@@ -178,10 +189,27 @@ export function QuizClient() {
                 onChange={(v) => setLead({ ...lead, company: v })}
               />
               <Field
-                label="ტელეფონის ნომერი (არასავალდებულო)"
-                type="tel"
-                value={lead.phone}
-                onChange={(v) => setLead({ ...lead, phone: v })}
+                label="შენი როლი (არასავალდებულო)"
+                placeholder="Founder, CEO, Marketing Lead..."
+                value={lead.role}
+                onChange={(v) => setLead({ ...lead, role: v })}
+              />
+              <Field
+                label="ვებსაიტი ან სოც. გვერდი (არასავალდებულო)"
+                value={lead.website}
+                onChange={(v) => setLead({ ...lead, website: v })}
+              />
+              <SelectField
+                label="თვიური შემოსავლის დიაპაზონი (არასავალდებულო)"
+                value={lead.revenue_range}
+                onChange={(v) => setLead({ ...lead, revenue_range: v })}
+                options={revenueRanges}
+              />
+              <SelectField
+                label="გუნდის ზომა (არასავალდებულო)"
+                value={lead.team_size}
+                onChange={(v) => setLead({ ...lead, team_size: v })}
+                options={teamSizeRanges}
               />
 
               <label className="mt-2 flex items-start gap-3 text-sm text-ink-soft">
@@ -192,7 +220,8 @@ export function QuizClient() {
                   className="mt-1 h-4 w-4 rounded border-line"
                 />
                 <span>
-                  ვეთანხმები, რომ Mini Marketing MRI-ის შედეგები და დაკავშირებული რეკომენდაციები ელფოსტაზე მივიღო.
+                  ვეთანხმები, რომ Mini Marketing MRI-ის შედეგები და დაკავშირებული
+                  რეკომენდაციები ელფოსტაზე მივიღო.
                 </span>
               </label>
               {leadErrors.consent && <p className="err">{leadErrors.consent}</p>}
@@ -221,7 +250,7 @@ export function QuizClient() {
           )}
           {isQuestionStep ? (
             <button type="button" onClick={next} className="btn-primary">
-              {step === quizQuestions.length - 1 ? "შედეგები" : "შემდეგი"}
+              {step === quizQuestions.length - 1 ? "საკონტაქტოზე გადასვლა" : "შემდეგი"}
             </button>
           ) : (
             <button
@@ -230,14 +259,14 @@ export function QuizClient() {
               disabled={submitting}
               className="btn-primary"
             >
-              {submitting ? "იგზავნება..." : "შედეგის მიღება"}
+              {submitting ? "იგზავნება..." : "შედეგის ნახვა"}
             </button>
           )}
         </div>
       </div>
 
       <p className="mt-6 text-center text-xs text-ink-muted">
-        ეს არ არის სრული Marketing MRI — ეს საწყისი მსუბუქი დიაგნოსტიკაა.
+        ეს არ არის სრული Marketing MRI — ეს საწყისი დიაგნოსტიკაა.
       </p>
     </div>
   );

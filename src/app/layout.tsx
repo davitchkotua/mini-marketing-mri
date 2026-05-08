@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mini Marketing MRI — Davit Chkotua / Marketing Architect Studio",
+  title: "Mini Marketing MRI — სად იკარგება მარკეტინგში ჩადებული შენი ინვესტიცია?",
   description:
-    "5-წუთიანი diagnostic-lite assessment, რომელიც გაჩვენებს შენი მარკეტინგის მთავარ სავარაუდო bottleneck-ს.",
+    "5-წუთიანი საწყისი დიაგნოსტიკა, რომელიც გაჩვენებს, რომელ ეტაპზე კარგავს შენი ბიზნესი გაყიდვებს, ბიუჯეტს ან ზრდის შანსს.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
