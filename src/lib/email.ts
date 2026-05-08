@@ -73,59 +73,78 @@ function renderHtml(args: {
     .join("");
 
   return `<!doctype html>
-<html lang="ka"><body style="margin:0;background:#170303;font-family:'Noto Sans Georgian',Inter,system-ui,sans-serif;color:#FFFFFF;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;background:#170303;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#1f0404;border:1px solid #333333;border-radius:12px;padding:32px;">
-        <tr><td>
-          <p style="margin:0 0 12px 0;font-size:12px;color:#6B6B6B;letter-spacing:.18em;text-transform:uppercase;">Mini Marketing MRI · საწყისი დიაგნოსტიკა</p>
-          <h1 style="margin:0 0 16px 0;font-size:22px;line-height:1.3;color:#FFFFFF;">გამარჯობა, ${escape(name)}</h1>
-          <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#D4D4D4;">მადლობა Mini Marketing MRI-ის შევსებისთვის. ქვემოთ არის შენი საწყისი დიაგნოსტიკა. ეს არ არის სრული Marketing MRI, მაგრამ გეხმარება დაინახო, სად შეიძლება იწყებოდეს პრობლემა.</p>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark only">
+<meta name="supported-color-schemes" content="dark only">
+<title>Mini Marketing MRI</title>
+<style>
+  :root { color-scheme: dark only; supported-color-schemes: dark only; }
+  body, table, td, p, h1, h2, ul, li, a, span { -webkit-font-smoothing:antialiased; }
+  /* Some clients (Apple Mail dark mode) auto-invert; lock our palette */
+  [data-ogsc] body, [data-ogsb] body { background:#170303 !important; }
+  @media (prefers-color-scheme: dark) {
+    body, .body-bg { background:#170303 !important; }
+  }
+</style>
+</head>
+<body bgcolor="#170303" style="margin:0;padding:0;background:#170303;background-color:#170303;font-family:'Noto Sans Georgian','Helvetica Neue',Arial,sans-serif;color:#FFFFFF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#170303" class="body-bg" style="background:#170303;background-color:#170303;padding:32px 0;">
+    <tr><td align="center" bgcolor="#170303" style="background:#170303;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#1f0404" style="background:#1f0404;background-color:#1f0404;border:1px solid #3a1010;border-radius:12px;max-width:600px;width:100%;">
+        <tr><td bgcolor="#1f0404" style="background:#1f0404;padding:32px;">
+          <p style="margin:0 0 12px 0;font-size:12px;color:#9a8a8a;letter-spacing:.18em;text-transform:uppercase;">Mini Marketing MRI · საწყისი დიაგნოსტიკა</p>
+          <h1 style="margin:0 0 16px 0;font-size:22px;line-height:1.3;color:#FFFFFF;font-weight:600;">გამარჯობა, ${escape(name)}</h1>
+          <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#D4C4C4;">მადლობა Mini Marketing MRI-ის შევსებისთვის. ქვემოთ არის შენი საწყისი დიაგნოსტიკა. ეს არ არის სრული Marketing MRI, მაგრამ გეხმარება დაინახო, სად შეიძლება იწყებოდეს პრობლემა.</p>
 
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #333333;border-radius:10px;padding:0;margin:0 0 24px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#170303" style="background:#170303;background-color:#170303;border:1px solid #3a1010;border-radius:10px;margin:0 0 24px 0;">
             <tr>
-              <td style="padding:14px 16px;border-bottom:1px solid #333333;">
-                <span style="font-size:13px;color:#D4D4D4;">დაკარგული ინვესტიციის რისკი</span><br>
-                <span style="font-size:18px;font-weight:600;color:#FFB21A;">${result.lostInvestmentRiskScore}% · ${escape(result.riskLabel)}</span>
+              <td bgcolor="#170303" style="background:#170303;padding:14px 16px;border-bottom:1px solid #3a1010;">
+                <div style="font-size:13px;color:#D4C4C4;margin-bottom:4px;">დაკარგული ინვესტიციის რისკი</div>
+                <div style="font-size:18px;font-weight:600;color:#FFB21A;">${result.lostInvestmentRiskScore}% · ${escape(result.riskLabel)}</div>
               </td>
             </tr>
             <tr>
-              <td style="padding:14px 16px;border-bottom:1px solid #333333;">
-                <span style="font-size:13px;color:#D4D4D4;">პრობლემის ხილვადობა</span><br>
-                <span style="font-size:18px;font-weight:600;color:#FFFFFF;">${result.problemVisibilityScore}% · ${escape(result.visibilityLabel)}</span>
+              <td bgcolor="#170303" style="background:#170303;padding:14px 16px;border-bottom:1px solid #3a1010;">
+                <div style="font-size:13px;color:#D4C4C4;margin-bottom:4px;">პრობლემის ხილვადობა</div>
+                <div style="font-size:18px;font-weight:600;color:#FFFFFF;">${result.problemVisibilityScore}% · ${escape(result.visibilityLabel)}</div>
               </td>
             </tr>
             <tr>
-              <td style="padding:14px 16px;">
-                <span style="font-size:13px;color:#D4D4D4;">Marketing MRI-სთვის მზადყოფნა</span><br>
-                <span style="font-size:18px;font-weight:600;color:#FFFFFF;">${result.mriReadinessScore}% · ${escape(result.readinessLabel)}</span>
-              </td>
-            </tr>
-          </table>
-
-          <h2 style="margin:0 0 8px 0;font-size:18px;color:#FFFFFF;">${escape(result.lossPoint.title)}</h2>
-          <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#D4D4D4;">${escape(result.lossPoint.diagnosis)}</p>
-
-          <p style="margin:0 0 8px 0;font-size:12px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.14em;">3 პრაქტიკული შემოწმება</p>
-          <ul style="margin:0 0 20px 18px;padding:0;font-size:15px;line-height:1.6;color:#D4D4D4;">${checks}</ul>
-
-          <div style="border:1px solid rgba(255,178,26,0.3);background:rgba(255,178,26,0.05);border-radius:10px;padding:16px;margin:0 0 24px 0;">
-            <p style="margin:0 0 6px 0;font-size:12px;color:#FFB21A;text-transform:uppercase;letter-spacing:.14em;">7-დღიანი მოქმედება</p>
-            <p style="margin:0;font-size:15px;line-height:1.6;color:#FFFFFF;">${escape(result.lossPoint.sevenDayAction)}</p>
-          </div>
-
-          <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#D4D4D4;">თუ გინდა, ეს შედეგი უფრო ღრმად გავშალოთ და გავიგოთ, სად იწყება რეალური პრობლემა, დაჯავშნე დიაგნოსტიკური ზარი.</p>
-
-          <table role="presentation" cellpadding="0" cellspacing="0">
-            <tr>
-              <td>
-                <a href="${bookUrl}" style="display:inline-block;background:#FFB21A;color:#170303;text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:600;">დაჯავშნე დიაგნოსტიკური ზარი</a>
+              <td bgcolor="#170303" style="background:#170303;padding:14px 16px;">
+                <div style="font-size:13px;color:#D4C4C4;margin-bottom:4px;">Marketing MRI-სთვის მზადყოფნა</div>
+                <div style="font-size:18px;font-weight:600;color:#FFFFFF;">${result.mriReadinessScore}% · ${escape(result.readinessLabel)}</div>
               </td>
             </tr>
           </table>
 
-          <p style="margin:24px 0 0 0;font-size:12px;color:#6B6B6B;line-height:1.6;">ეს არის საწყისი დიაგნოსტიკა და არა სრული Marketing MRI.</p>
-          <p style="margin:12px 0 0 0;font-size:13px;color:#6B6B6B;">Davit Chkotua / Marketing Architect Studio</p>
+          <h2 style="margin:0 0 8px 0;font-size:18px;color:#FFFFFF;font-weight:600;">${escape(result.lossPoint.title)}</h2>
+          <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#D4C4C4;">${escape(result.lossPoint.diagnosis)}</p>
+
+          <p style="margin:0 0 8px 0;font-size:12px;color:#9a8a8a;text-transform:uppercase;letter-spacing:.14em;">3 პრაქტიკული შემოწმება</p>
+          <ul style="margin:0 0 20px 18px;padding:0;font-size:15px;line-height:1.6;color:#D4C4C4;">${checks}</ul>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#2a1208" style="background:#2a1208;background-color:#2a1208;border:1px solid #FFB21A;border-radius:10px;margin:0 0 24px 0;">
+            <tr><td bgcolor="#2a1208" style="background:#2a1208;padding:16px;">
+              <div style="font-size:12px;color:#FFB21A;text-transform:uppercase;letter-spacing:.14em;margin-bottom:6px;">7-დღიანი მოქმედება</div>
+              <div style="font-size:15px;line-height:1.6;color:#FFFFFF;">${escape(result.lossPoint.sevenDayAction)}</div>
+            </td></tr>
+          </table>
+
+          <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#D4C4C4;">თუ გინდა, ეს შედეგი უფრო ღრმად გავშალოთ და გავიგოთ, სად იწყება რეალური პრობლემა, დაჯავშნე დიაგნოსტიკური ზარი.</p>
+
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td bgcolor="#FFB21A" style="background:#FFB21A;background-color:#FFB21A;border-radius:8px;">
+                <a href="${bookUrl}" style="display:inline-block;background:#FFB21A;color:#170303;text-decoration:none;padding:12px 22px;border-radius:8px;font-size:15px;font-weight:600;mso-padding-alt:0;">დაჯავშნე დიაგნოსტიკური ზარი</a>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin:24px 0 0 0;font-size:12px;color:#9a8a8a;line-height:1.6;">ეს არის საწყისი დიაგნოსტიკა და არა სრული Marketing MRI.</p>
+          <p style="margin:12px 0 0 0;font-size:13px;color:#9a8a8a;">Davit Chkotua / Marketing Architect Studio</p>
         </td></tr>
       </table>
     </td></tr>

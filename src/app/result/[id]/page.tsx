@@ -1,39 +1,12 @@
 import { notFound } from "next/navigation";
 import { getServerSupabase } from "@/lib/supabase";
-import { ResultView } from "@/components/ResultView";
-import { lossPoints } from "@/lib/bottlenecks";
-import {
-  getReadinessExplanation,
-  getReadinessLabel,
-  getRiskExplanation,
-  getRiskLabel,
-  getVisibilityExplanation,
-  getVisibilityLabel,
-} from "@/lib/scoring";
-import type { SuspectedLossPoint } from "@/lib/quiz-data";
 
 export const dynamic = "force-dynamic";
 
 interface ResultRow {
   id: string;
   name: string;
-  lost_investment_risk_score: number | null;
-  problem_visibility_score: number | null;
-  mri_readiness_score: number | null;
-  risk_label: string | null;
-  visibility_label: string | null;
-  readiness_label: string | null;
-  suspected_loss_point: string | null;
-  result_summary: {
-    title?: string;
-    diagnosis?: string;
-    meanings?: string[];
-    checks?: string[];
-    seven_day_action?: string;
-    risk_explanation?: string;
-    visibility_explanation?: string;
-    readiness_explanation?: string;
-  } | null;
+  email: string;
 }
 
 export default async function ResultPage({
@@ -44,9 +17,7 @@ export default async function ResultPage({
   const supabase = getServerSupabase();
   const { data, error } = await supabase
     .from("quiz_submissions")
-    .select(
-      "id,name,lost_investment_risk_score,problem_visibility_score,mri_readiness_score,risk_label,visibility_label,readiness_label,suspected_loss_point,result_summary"
-    )
+    .select("id,name,email")
     .eq("id", params.id)
     .single<ResultRow>();
 
@@ -55,40 +26,61 @@ export default async function ResultPage({
   const bookCallUrl =
     process.env.BOOK_CALL_URL || "https://www.davitchkotua.com/#book-call";
 
-  const riskScore = data.lost_investment_risk_score ?? 0;
-  const visibilityScore = data.problem_visibility_score ?? 0;
-  const readinessScore = data.mri_readiness_score ?? 0;
-  const lossPointKey = (data.suspected_loss_point ?? "CONTROL_SYSTEM") as SuspectedLossPoint;
-  const lp = lossPoints[lossPointKey] ?? lossPoints.CONTROL_SYSTEM;
-  const summary = data.result_summary ?? {};
-
   return (
-    <ResultView
-      id={data.id}
-      name={data.name}
-      riskScore={riskScore}
-      visibilityScore={visibilityScore}
-      readinessScore={readinessScore}
-      riskLabel={data.risk_label ?? getRiskLabel(riskScore)}
-      visibilityLabel={data.visibility_label ?? getVisibilityLabel(visibilityScore)}
-      readinessLabel={data.readiness_label ?? getReadinessLabel(readinessScore)}
-      riskExplanation={
-        summary.risk_explanation ?? getRiskExplanation(riskScore)
-      }
-      visibilityExplanation={
-        summary.visibility_explanation ?? getVisibilityExplanation(visibilityScore)
-      }
-      readinessExplanation={
-        summary.readiness_explanation ?? getReadinessExplanation(readinessScore)
-      }
-      lossPoint={{
-        title: summary.title ?? lp.title,
-        diagnosis: summary.diagnosis ?? lp.diagnosis,
-        meanings: summary.meanings ?? lp.meanings,
-        checks: summary.checks ?? lp.checks,
-        sevenDayAction: summary.seven_day_action ?? lp.sevenDayAction,
-      }}
-      bookCallUrl={bookCallUrl}
-    />
+    <div className="mx-auto max-w-2xl px-5 py-16 md:py-24">
+      <div className="card text-center">
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-accent/15">
+          <svg
+            viewBox="0 0 24 24"
+            className="h-7 w-7 text-accent"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 4h16v16H4z" />
+            <path d="M4 7l8 6 8-6" />
+          </svg>
+        </div>
+
+        <p className="text-xs uppercase tracking-[0.18em] text-ink-muted">
+          მინი დიაგნოსტიკა
+        </p>
+        <h1 className="mt-2 text-2xl md:text-3xl font-semibold leading-snug">
+          {data.name}, მადლობა — შენი შედეგი ელფოსტაზე გამოგზავნილია.
+        </h1>
+
+        <p className="mt-5 text-ink-soft leading-relaxed">
+          საწყისი დიაგნოსტიკა გამოგიგზავნე ამ მისამართზე:
+        </p>
+        <p className="mt-2 text-base font-medium text-accent">{data.email}</p>
+
+        <p className="mt-6 text-sm text-ink-muted leading-relaxed">
+          შემოწმე საფოსტო ყუთი (ასევე <span className="text-ink-soft">Spam</span> ან <span className="text-ink-soft">Promotions</span> საქაღალდე) — წერილში ნახავ შენს 3 ქულას, საეჭვო ზონას და 7-დღიან გეგმას.
+        </p>
+
+        <div className="mt-10 border-t border-line pt-8">
+          <h2 className="text-lg md:text-xl font-semibold leading-snug">
+            გინდა, ერთად გავშალოთ შენი შედეგი?
+          </h2>
+          <p className="mt-3 text-sm text-ink-soft leading-relaxed">
+            დიაგნოსტიკურ ზარზე ვნახავთ, რომელი სიგნალია შენთვის ყველაზე ღირებული და საიდან უნდა დაიწყო.
+          </p>
+          <a
+            href={bookCallUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary mt-6 inline-block"
+          >
+            დაჯავშნე დიაგნოსტიკური ზარი
+          </a>
+        </div>
+      </div>
+
+      <p className="mt-6 text-center text-xs text-ink-muted">
+        ეს არის საწყისი დიაგნოსტიკა — სრული Marketing MRI უფრო ღრმად განიხილავს თითოეულ ეტაპს.
+      </p>
+    </div>
   );
 }

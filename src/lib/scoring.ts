@@ -144,7 +144,7 @@ function determinePrimaryLossPoint(answers: Answers): SuspectedLossPoint {
 }
 
 export function computeScore(answers: Answers): ScoreResult {
-  let risk = 40;
+  let risk = 55;
   let visibility = 50;
   let readiness = 40;
 

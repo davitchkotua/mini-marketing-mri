@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { quizQuestions, type QuizOption, type QuizQuestion } from "@/lib/quiz-data";
 import { track } from "@/lib/analytics";
@@ -98,10 +98,22 @@ export function QuizClient() {
   const isQuestionStep = step < quizQuestions.length;
   const currentQuestion = isQuestionStep ? quizQuestions[step] : null;
 
-  const resolved = useMemo(
-    () => (currentQuestion ? resolveQuestion(currentQuestion, answers) : null),
-    [currentQuestion, answers]
-  );
+  // Cache shuffled options per question so the order stays stable when
+  // the user navigates back/forward within the session.
+  const shuffleCacheRef = useRef<Record<string, QuizOption[]>>({});
+
+  const resolved = useMemo(() => {
+    if (!currentQuestion) return null;
+    const base = resolveQuestion(currentQuestion, answers);
+    if (!currentQuestion.randomize) return base;
+
+    let shuffled = shuffleCacheRef.current[currentQuestion.id];
+    if (!shuffled) {
+      shuffled = [...base.options].sort(() => Math.random() - 0.5);
+      shuffleCacheRef.current[currentQuestion.id] = shuffled;
+    }
+    return { ...base, options: shuffled };
+  }, [currentQuestion, answers]);
 
   function next() {
     if (isQuestionStep && currentQuestion) {

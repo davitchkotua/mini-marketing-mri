@@ -38,6 +38,8 @@ export interface QuizQuestion {
   helperText?: string;
   contextField?: ContextField;
   options: QuizOption[];
+  /** When true, options are rendered in randomized order (stable per session). */
+  randomize?: boolean;
   /** When set, options are filtered to only those keys present in the answer of this qid. */
   dynamicOptionsFrom?: string;
   /** When the source qid contains the unknownKey, swap to the alternate title + options. */
@@ -138,7 +140,9 @@ export const quizQuestions: QuizQuestion[] = [
       { key: "C", label: "100–500 ₾", contextValue: "100_500" },
       { key: "D", label: "500–2,000 ₾", contextValue: "500_2k", modifier: { readiness: 10, risk: 10 } },
       { key: "E", label: "2,000–10,000 ₾", contextValue: "2k_10k", modifier: { readiness: 10, risk: 10 } },
-      { key: "F", label: "10,000+ ₾", contextValue: "10k_plus", modifier: { readiness: 10, risk: 10 } },
+      { key: "F", label: "10,000–50,000 ₾", contextValue: "10k_50k", modifier: { readiness: 10, risk: 10 } },
+      { key: "G", label: "50,000–200,000 ₾", contextValue: "50k_200k", modifier: { readiness: 10, risk: 10 } },
+      { key: "H", label: "200,000+ ₾", contextValue: "200k_plus", modifier: { readiness: 10, risk: 10 } },
     ],
   },
   {
@@ -146,12 +150,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 6,
     title: "იცით, რომელი არხიდან მოდის ყველაზე ხარისხიანი პოტენციური კლიენტი?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არა", modifier: { visibility: -25, risk: 20, readiness: -10 }, suspectedLossPoint: "MONEY_SOURCE" },
       { key: "B", label: "ზოგადად ვხვდებით", modifier: { visibility: -10, risk: 10 } },
       { key: "C", label: "ვიცით, საიდან მოდის ბევრი ადამიანი, მაგრამ არა რომელი მოდის ყველაზე ხარისხიანი", modifier: { visibility: -5, risk: 10 }, suspectedLossPoint: "MONEY_SOURCE" },
       { key: "D", label: "ვიცით მთავარი ხარისხიანი არხები", modifier: { visibility: 15, readiness: 10 } },
-      { key: "E", label: "ვიცით არხების მიხედვით: რაოდენობა, ხარისხი, გაყიდვა და საშუალო ჩეკი", modifier: { visibility: 25, readiness: 20, risk: -10 } },
+      { key: "E", label: "ვიცით არხების მიხედვით: რაოდენობა, ხარისხი, გაყიდვა და საშუალო ჩეკი", modifier: { visibility: 25, readiness: 20, risk: -5 } },
     ],
   },
   {
@@ -159,12 +164,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 7,
     title: "იმ ადამიანებიდან, ვინც გიკავშირდებათ, დაახლოებით რამდენი გადადის რეალურ საუბარში?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არ ვიცით", modifier: { visibility: -20, risk: 20, readiness: -5 }, suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
       { key: "B", label: "ძალიან ცოტა", modifier: { risk: 25 }, suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
       { key: "C", label: "დაახლოებით 25%-ზე ნაკლები", modifier: { risk: 15 }, suspectedLossPoint: "CONTACT_TO_CONVERSATION" },
       { key: "D", label: "დაახლოებით 25–50%", modifier: { visibility: 10, readiness: 5 } },
-      { key: "E", label: "დაახლოებით 50%+", modifier: { visibility: 15, risk: -10, readiness: 10 } },
+      { key: "E", label: "დაახლოებით 50%+", modifier: { visibility: 15, risk: -5, readiness: 10 } },
     ],
   },
   {
@@ -172,12 +178,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 8,
     title: "საუბრის შემდეგ რამდენ ადამიანს უგზავნით კონკრეტულ შეთავაზებას?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არ ვიცით", modifier: { visibility: -20, risk: 20, readiness: -5 }, suspectedLossPoint: "CONVERSATION_TO_OFFER" },
       { key: "B", label: "ძალიან ცოტას", modifier: { risk: 25 }, suspectedLossPoint: "CONVERSATION_TO_OFFER" },
       { key: "C", label: "დაახლოებით 25%-ზე ნაკლებს", modifier: { risk: 15 }, suspectedLossPoint: "CONVERSATION_TO_OFFER" },
       { key: "D", label: "დაახლოებით 25–50%-ს", modifier: { visibility: 10, readiness: 5 } },
-      { key: "E", label: "დაახლოებით 50%+-ს", modifier: { visibility: 15, risk: -10, readiness: 10 } },
+      { key: "E", label: "დაახლოებით 50%+-ს", modifier: { visibility: 15, risk: -5, readiness: 10 } },
     ],
   },
   {
@@ -185,12 +192,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 9,
     title: "გაგზავნილი შეთავაზებებიდან დაახლოებით რამდენი სრულდება გაყიდვით?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არ ვიცით", modifier: { visibility: -25, risk: 20, readiness: -5 }, suspectedLossPoint: "OFFER_TO_SALE" },
       { key: "B", label: "10%-ზე ნაკლები", modifier: { risk: 30 }, suspectedLossPoint: "OFFER_TO_SALE" },
       { key: "C", label: "დაახლოებით 10–25%", modifier: { risk: 15 }, suspectedLossPoint: "OFFER_TO_SALE" },
       { key: "D", label: "დაახლოებით 25–50%", modifier: { visibility: 10, readiness: 10 } },
-      { key: "E", label: "50%+", modifier: { visibility: 20, risk: -15, readiness: 15 } },
+      { key: "E", label: "50%+", modifier: { visibility: 20, risk: -5, readiness: 15 } },
     ],
   },
   {
@@ -198,12 +206,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 10,
     title: "ბოლო 10 დაკარგული პოტენციური კლიენტიდან იცით, რატომ დაიკარგნენ?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არა", modifier: { visibility: -30, risk: 25, readiness: -10 } },
       { key: "B", label: "ზოგადად ვხვდებით, მაგრამ არ გვაქვს ჩაწერილი", modifier: { visibility: -15, risk: 15 } },
       { key: "C", label: "ნაწილობრივ ვიცით", modifier: { visibility: 5, risk: 5, readiness: 5 } },
       { key: "D", label: "მიზეზები ჩაწერილია", modifier: { visibility: 20, readiness: 15 } },
-      { key: "E", label: "მიზეზებს ვაანალიზებთ და ამის მიხედვით ვცვლით პროცესს", modifier: { visibility: 30, readiness: 25, risk: -10 } },
+      { key: "E", label: "მიზეზებს ვაანალიზებთ და ამის მიხედვით ვცვლით პროცესს", modifier: { visibility: 30, readiness: 25, risk: -5 } },
     ],
   },
   {
@@ -233,12 +242,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 13,
     title: "გაქვთ თუ არა განმეორებითი დაკავშირების პროცესი?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არა", modifier: { risk: 30, visibility: -15, readiness: -5 }, suspectedLossPoint: "FOLLOW_UP" },
       { key: "B", label: "ზოგჯერ ვწერთ ან ვურეკავთ", modifier: { risk: 20 }, suspectedLossPoint: "FOLLOW_UP" },
       { key: "C", label: "გვაქვს ზოგადი წესი, მაგრამ არ სრულდება სტაბილურად", modifier: { risk: 10, visibility: 5 }, suspectedLossPoint: "FOLLOW_UP" },
       { key: "D", label: "გვაქვს პროცესი და პასუხისმგებელი პირი", modifier: { visibility: 15, readiness: 10 } },
-      { key: "E", label: "გვაქვს პროცესი, პასუხისმგებელი პირი და ვზომავთ შედეგს", modifier: { visibility: 25, readiness: 20, risk: -10 } },
+      { key: "E", label: "გვაქვს პროცესი, პასუხისმგებელი პირი და ვზომავთ შედეგს", modifier: { visibility: 25, readiness: 20, risk: -5 } },
     ],
   },
   {
@@ -246,12 +256,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 14,
     title: "კვირაში ერთხელ მაინც უყურებთ მარკეტინგისა და გაყიდვების ძირითად ციფრებს?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არა", modifier: { visibility: -20, risk: 20, readiness: -10 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "B", label: "იშვიათად", modifier: { visibility: -10, risk: 10 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "C", label: "ვუყურებთ, მაგრამ არარეგულარულად", modifier: { risk: 5, visibility: 5 } },
       { key: "D", label: "ვუყურებთ ყოველკვირეულად", modifier: { visibility: 15, readiness: 10 } },
-      { key: "E", label: "ვუყურებთ ყოველკვირეულად და ამის მიხედვით ვცვლით მოქმედებებს", modifier: { visibility: 25, readiness: 20, risk: -10 } },
+      { key: "E", label: "ვუყურებთ ყოველკვირეულად და ამის მიხედვით ვცვლით მოქმედებებს", modifier: { visibility: 25, readiness: 20, risk: -5 } },
     ],
   },
   {
@@ -259,12 +270,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 15,
     title: "გაყიდვამდე გზის თითოეულ ეტაპზე იცით, ვინ არის პასუხისმგებელი?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არა", modifier: { risk: 20, visibility: -15 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "B", label: "ზოგადად ვიცით", modifier: { risk: 10 } },
       { key: "C", label: "ნაწილობრივ გაწერილია", modifier: { visibility: 5, readiness: 5 } },
       { key: "D", label: "ძირითადად გაწერილია", modifier: { visibility: 15, readiness: 10 } },
-      { key: "E", label: "ყველა მთავარ ეტაპს ჰყავს პასუხისმგებელი პირი", modifier: { visibility: 25, readiness: 15, risk: -10 } },
+      { key: "E", label: "ყველა მთავარ ეტაპს ჰყავს პასუხისმგებელი პირი", modifier: { visibility: 25, readiness: 15, risk: -5 } },
     ],
   },
   {
@@ -272,12 +284,13 @@ export const quizQuestions: QuizQuestion[] = [
     number: 16,
     title: "როცა შედეგი არ მოდის, იცით პირველ რიგში რას ცვლით?",
     type: "single",
+    randomize: true,
     options: [
       { key: "A", label: "არა, ძირითადად ახალ იდეას ვცდით", modifier: { visibility: -25, risk: 25, readiness: -10 }, suspectedLossPoint: "CONTROL_SYSTEM" },
       { key: "B", label: "ზოგადად ვხვდებით", modifier: { visibility: -10, risk: 10 } },
       { key: "C", label: "ხანდახან ვიცით, მაგრამ სისტემურად არა", modifier: { visibility: 5 } },
       { key: "D", label: "ხშირად ვიცით, რომელ ეტაპს უნდა შევეხოთ", modifier: { visibility: 15, readiness: 10 } },
-      { key: "E", label: "გვაქვს მკაფიო წესი, რა მონაცემით ვიღებთ ცვლილების გადაწყვეტილებას", modifier: { visibility: 30, readiness: 20, risk: -15 } },
+      { key: "E", label: "გვაქვს მკაფიო წესი, რა მონაცემით ვიღებთ ცვლილების გადაწყვეტილებას", modifier: { visibility: 30, readiness: 20, risk: -5 } },
     ],
   },
 ];
