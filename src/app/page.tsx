@@ -12,18 +12,18 @@ const dimensions = [
 
 const symptoms = [
   "კამპანიები მიდის, მაგრამ გაყიდვები არასტაბილურია",
-  "კონტენტი იქმნება, მაგრამ არ გროვდება ეფექტში",
-  "leads მოდის, მაგრამ conversion სუსტია",
-  "არ ჩანს რომელი ნაწილია რეალურად გატეხილი",
-  "გადაწყვეტილებები შეგრძნებით მიიღება, არა მტკიცებულებით",
+  "კონტენტი იქმნება, მაგრამ ეფექტი არ გროვდება",
+  "ლიდები მოდის, მაგრამ კონვერსია სუსტია",
+  "არ ჩანს, რომელი ნაწილია რეალურად გატეხილი",
+  "გადაწყვეტილებები შეგრძნებით მიიღება და არა მტკიცებულებით",
 ];
 
 const outcomes = [
-  "Marketing Health Score",
-  "Primary bottleneck type",
+  "მარკეტინგის ჯანმრთელობის ქულა",
+  "მთავარი სუსტი წერტილის ტიპი",
   "მოკლე ინტერპრეტაცია",
-  "რეკომენდირებული შემდეგი ნაბიჯი",
-  "ელფოსტაზე mini diagnostic report",
+  "რეკომენდებული შემდეგი ნაბიჯი",
+  "მინი დიაგნოსტიკური ანგარიში ელფოსტაზე",
 ];
 
 export default function LandingPage() {
@@ -38,21 +38,15 @@ export default function LandingPage() {
             სად იკარგება შენი მარკეტინგის ფული?
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-ink-soft leading-relaxed">
-            გაიარე 5-წუთიანი Mini Marketing MRI Quiz და მიიღე საწყისი დიაგნოსტიკა:
-            რა არის შენი ყველაზე სავარაუდო bottleneck — offer, funnel, conversion,
-            execution თუ decision system.
+            გაიარე 5-წუთიანი Mini Marketing MRI ქვიზი და მიიღე საწყისი დიაგნოსტიკა: რა არის შენი ყველაზე სავარაუდო სუსტი წერტილი — შეთავაზება, გაყიდვის გზა, კონვერსია, შესრულება თუ გადაწყვეტილების სისტემა.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/quiz" className="btn-primary">
               დიაგნოსტიკის დაწყება
             </Link>
-            <a href="#what-it-checks" className="btn-ghost">
-              რას ამოწმებს ქვიზი
-            </a>
           </div>
           <p className="mt-8 max-w-2xl text-sm text-ink-muted leading-relaxed">
-            ეს არ არის სრული Marketing MRI. ეს არის საწყისი diagnostic-lite assessment,
-            რომელიც გაჩვენებს სად ღირს უფრო ღრმა ანალიზის დაწყება.
+            ეს არ არის სრული Marketing MRI. ეს არის საწყისი მსუბუქი დიაგნოსტიკა, რომელიც გაჩვენებს, საიდან ღირს უფრო ღრმა ანალიზის დაწყება.
           </p>
         </div>
       </section>
@@ -61,12 +55,10 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-5 py-16 md:py-20 grid md:grid-cols-2 gap-10">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-              მარკეტინგი მიდის, მაგრამ კომერციული სისტემა არ ჩანს
+              მარკეტინგი მუშაობს, მაგრამ კომერციული სისტემა არ ჩანს
             </h2>
             <p className="mt-4 text-ink-soft leading-relaxed">
-              ბევრი ბიზნესი ბევრ აქტივობას აკეთებს — რეკლამა, კონტენტი, კამპანიები,
-              შეხვედრები. მაგრამ ხშირად არ ჩანს რომელი ნაწილი ქმნის შემოსავალს და
-              რომელი ნაწილი ბლოკავს ზრდას.
+              ბევრი ბიზნესი ბევრ აქტივობას აკეთებს — რეკლამა, კონტენტი, კამპანიები, შეხვედრები. მაგრამ ხშირად არ ჩანს, რომელი ნაწილი ქმნის შემოსავალს და რომელი ბლოკავს ზრდას.
             </p>
           </div>
           <ul className="space-y-3">
@@ -105,8 +97,7 @@ export default function LandingPage() {
               რას იღებ ქვიზის ბოლოს
             </h2>
             <p className="mt-4 text-ink-soft leading-relaxed">
-              შედეგი არ არის ვერდიქტი — ეს არის საწყისი წერტილი, რომელიც გაჩვენებს
-              სად ღირს უფრო ღრმა დიაგნოსტიკა Marketing MRI-ს ფარგლებში.
+              შედეგი არ არის ვერდიქტი — ეს არის საწყისი წერტილი, რომელიც გაჩვენებს, სად ღირს უფრო ღრმა დიაგნოსტიკა Marketing MRI-ს ფარგლებში.
             </p>
           </div>
           <ul className="space-y-3">
@@ -128,10 +119,13 @@ export default function LandingPage() {
           <p className="mx-auto mt-4 max-w-xl text-ink-soft">
             5 წუთი. 7 კითხვა. პერსონალიზებული საწყისი დიაგნოსტიკა შენს ელფოსტაზე.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/quiz" className="btn-primary">
               დიაგნოსტიკის დაწყება
             </Link>
+            <a href="https://www.davitchkotua.com/#book-call" className="btn-ghost">
+              დაჯავშნე ზარი
+            </a>
           </div>
         </div>
       </section>

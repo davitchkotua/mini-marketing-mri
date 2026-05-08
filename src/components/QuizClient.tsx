@@ -63,7 +63,7 @@ export function QuizClient() {
   function next() {
     if (isQuestionStep && currentQuestion) {
       if (typeof currentAnswer !== "number") {
-        setError("გთხოვ აირჩიო პასუხი წინ გადასასვლელად.");
+        setError("გთხოვ, წინ გადასასვლელად პასუხი აირჩიო.");
         return;
       }
       track("quiz_step_completed", { step: step + 1, key: currentQuestion.key });
@@ -163,8 +163,7 @@ export function QuizClient() {
               სად გამოგიგზავნოთ შენი საწყისი დიაგნოსტიკა?
             </h2>
             <p className="mt-2 text-sm text-ink-muted">
-              ვიყენებთ მხოლოდ შენი შედეგისა და შესაბამისი რეკომენდაციების
-              გამოსაგზავნად.
+              ამ ინფორმაციას ვიყენებთ მხოლოდ შენი შედეგისა და შესაბამისი რეკომენდაციების გამოსაგზავნად.
             </p>
 
             <div className="mt-6 grid gap-4">
@@ -200,7 +199,7 @@ export function QuizClient() {
                 onChange={(v) => setLead({ ...lead, website: v })}
               />
               <SelectField
-                label="თვიური შემოსავლის რეინჯი (არასავალდებულო)"
+                label="თვიური შემოსავლის დიაპაზონი (არასავალდებულო)"
                 value={lead.revenue_range}
                 onChange={(v) => setLead({ ...lead, revenue_range: v })}
                 options={revenueRanges}
@@ -220,8 +219,7 @@ export function QuizClient() {
                   className="mt-1 h-4 w-4 rounded border-line"
                 />
                 <span>
-                  ვეთანხმები, რომ მივიღო Mini Marketing MRI-ის შედეგები და
-                  დაკავშირებული რეკომენდაციები ელფოსტაზე.
+                  ვეთანხმები, რომ Mini Marketing MRI-ის შედეგები და დაკავშირებული რეკომენდაციები ელფოსტაზე მივიღო.
                 </span>
               </label>
               {leadErrors.consent && <p className="err">{leadErrors.consent}</p>}
@@ -246,7 +244,7 @@ export function QuizClient() {
           </button>
           {isQuestionStep ? (
             <button type="button" onClick={next} className="btn-primary">
-              {step === quizQuestions.length - 1 ? "გადასვლა საკონტაქტოზე" : "შემდეგი"}
+              {step === quizQuestions.length - 1 ? "საკონტაქტოზე გადასვლა" : "შემდეგი"}
             </button>
           ) : (
             <button
@@ -262,7 +260,7 @@ export function QuizClient() {
       </div>
 
       <p className="mt-6 text-center text-xs text-ink-muted">
-        ეს არ არის სრული Marketing MRI — საწყისი diagnostic-lite assessment-ია.
+        ეს არ არის სრული Marketing MRI — ეს საწყისი მსუბუქი დიაგნოსტიკაა.
       </p>
     </div>
   );

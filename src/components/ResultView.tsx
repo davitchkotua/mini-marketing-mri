@@ -38,7 +38,7 @@ export function ResultView(props: ResultProps) {
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Stat label="ქულა" value={`${props.totalScore}/28`} />
         <Stat label="პროცენტი" value={`${props.percentage}%`} />
-        <Stat label="Health level" value={props.healthLevel} />
+        <Stat label="ჯანმრთელობის დონე" value={props.healthLevel} />
       </div>
 
       <div className="mt-6 card">
@@ -71,29 +71,19 @@ export function ResultView(props: ResultProps) {
         <p className="mt-2 leading-relaxed">{props.recommendedCopy}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <a
-            href={props.bookCallUrl}
+            href="https://www.davitchkotua.com/#book-call"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => track("call_cta_clicked", { id: props.id })}
-            className="inline-flex items-center justify-center rounded-lg bg-paper px-5 py-3 text-base font-medium text-ink hover:bg-white"
+            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-ink hover:bg-paper"
           >
-            დაჯავშნე Marketing Architects Call
-          </a>
-          <a
-            href={props.fullMriUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track("mri_cta_clicked", { id: props.id })}
-            className="inline-flex items-center justify-center rounded-lg border border-paper/40 px-5 py-3 text-base font-medium text-paper hover:bg-paper hover:text-ink"
-          >
-            მინდა სრული Marketing MRI შეფასება
+            დაჯავშნე ზარი
           </a>
         </div>
       </div>
 
       <p className="mt-6 text-sm text-ink-muted">
-        ეს არის საწყისი diagnostic-lite assessment და არა სრული Marketing MRI.
-        დეტალური შედეგი ასევე გაგზავნილია შენს ელფოსტაზე.
+        ეს არის საწყისი მსუბუქი დიაგნოსტიკა და არა სრული Marketing MRI. დეტალური შედეგი ასევე გაგზავნილია შენს ელფოსტაზე.
       </p>
     </div>
   );

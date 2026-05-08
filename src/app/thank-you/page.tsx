@@ -10,8 +10,7 @@ export default function ThankYouPage() {
         შენი საწყისი დიაგნოსტიკა გაგზავნილია
       </h1>
       <p className="mt-4 text-ink-soft leading-relaxed">
-        შეამოწმე ელფოსტა — გამოგზავნილია შენი Mini Marketing MRI შედეგი და
-        რეკომენდირებული შემდეგი ნაბიჯი. თუ ვერ ხედავ — შეამოწმე spam ფოლდერი.
+        შეამოწმე ელფოსტა — გამოგზავნილია შენი Mini Marketing MRI შედეგი და რეკომენდირებული შემდეგი ნაბიჯი. თუ ვერ ხედავ — შეამოწმე spam ფოლდერი.
       </p>
       <div className="mt-8">
         <Link href="/" className="btn-secondary">
