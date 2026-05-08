@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 const dimensions = [
-  "Money Clarity",
-  "Offer Clarity",
-  "ICP Clarity",
-  "Funnel Visibility",
-  "Conversion Evidence",
-  "Execution Rhythm",
-  "Decision System",
+  "ფულის სიცხადე",
+  "შეთავაზების სიცხადე",
+  "იდეალური მომხმარებელი",
+  "გაყიდვამდე გზა",
+  "გაყიდვის დაკარგვის წერტილები",
+  "შესრულების რიტმი",
+  "გადაწყვეტილების მიღება",
 ];
 
 const symptoms = [
