@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 rel="noopener noreferrer"
                 className="text-xs font-semibold text-ink uppercase tracking-wider hover:text-accent transition"
               >
-                Mini Marketing MRI
+                www.davitchkotua.com
               </a>
             </div>
           </header>
