@@ -143,8 +143,8 @@ export function QuizClient() {
                       className={[
                         "w-full text-left rounded-lg border px-4 py-3 transition",
                         selected
-                          ? "border-ink bg-ink text-paper"
-                          : "border-line bg-white hover:border-ink",
+                          ? "border-accent bg-accent text-[#170303] font-medium"
+                          : "border-line bg-[#1f0404] text-ink-soft hover:border-ink/60 hover:text-ink",
                       ].join(" ")}
                     >
                       <span className="block text-sm leading-relaxed">{a.label}</span>

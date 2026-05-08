@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
 body {
-  background: #f7f5f0;
-  color: #0b0f14;
+  background: #170303;
+  color: #ffffff;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -22,19 +22,19 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-white transition hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-[#170303] transition hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center rounded-lg border border-ink bg-transparent px-5 py-3 text-base font-medium text-ink transition hover:bg-ink hover:text-paper;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-ink transition hover:border-ink;
+    @apply inline-flex items-center justify-center rounded-lg border border-line bg-transparent px-4 py-2 text-sm font-medium text-ink transition hover:border-ink/60;
   }
   .card {
-    @apply rounded-xl border border-line bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.02)];
+    @apply rounded-xl border border-line bg-[#1f0404] p-6;
   }
   .field {
-    @apply w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base text-ink outline-none transition focus:border-ink;
+    @apply w-full rounded-lg border border-line bg-[#1f0404] px-3 py-2.5 text-base text-ink outline-none transition focus:border-ink/60 placeholder:text-ink-muted;
   }
   .label {
     @apply mb-1.5 block text-sm font-medium text-ink-soft;

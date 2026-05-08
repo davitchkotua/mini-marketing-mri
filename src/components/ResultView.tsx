@@ -64,18 +64,18 @@ export function ResultView(props: ResultProps) {
         </div>
       </div>
 
-      <div className="mt-6 card bg-ink text-paper border-ink">
-        <p className="text-xs uppercase tracking-[0.18em] text-paper/60">
+      <div className="mt-6 rounded-xl border border-accent/30 bg-accent/10 p-6">
+        <p className="text-xs uppercase tracking-[0.18em] text-accent/70">
           რეკომენდაცია
         </p>
-        <p className="mt-2 leading-relaxed">{props.recommendedCopy}</p>
+        <p className="mt-2 leading-relaxed text-ink">{props.recommendedCopy}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <a
             href="https://www.davitchkotua.com/#book-call"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => track("call_cta_clicked", { id: props.id })}
-            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-ink hover:bg-paper"
+            className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-base font-medium text-[#170303] hover:bg-accent-hover transition"
           >
             დაჯავშნე ზარი
           </a>
