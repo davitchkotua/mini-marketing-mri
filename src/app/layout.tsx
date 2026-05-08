@@ -17,9 +17,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/" className="text-sm font-semibold tracking-wide">
                 Marketing Architect Studio
               </a>
-              <span className="text-xs text-ink-muted uppercase tracking-wider">
+              <a
+                href="https://www.davitchkotua.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-semibold text-ink uppercase tracking-wider hover:text-accent transition"
+              >
                 Mini Marketing MRI
-              </span>
+              </a>
             </div>
           </header>
           <main className="flex-1">{children}</main>
