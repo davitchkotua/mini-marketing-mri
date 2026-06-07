@@ -1,165 +1,222 @@
-# Mini Marketing MRI Quiz
+# Mini Marketing MRI
 
-Lead-magnet web app for **Davit Chkotua / Marketing Architect Studio**. Landing page → 7-question diagnostic quiz → lead capture → Supabase storage → automated diagnostic email via Resend → result page with CTAs to book a Marketing Architects Call or request a full Marketing MRI.
+> 16-კითხვიანი დიაგნოსტიკური ქვიზი ქართული ბიზნესებისთვის — სად კარგავს ბიზნესი მარკეტინგში ჩადებულ ინვესტიციას.
+>
+> **Live:** [quiz.davitchkotua.com](https://quiz.davitchkotua.com)
+>
+> ეს არის lead-generation ინსტრუმენტი [Marketing Architect Studio](https://www.davitchkotua.com)-სთვის. შევსების შემდეგ ვიზიტორი იღებს პერსონალიზებულ მინი დიაგნოსტიკას ელფოსტაზე და CTA-ს დიაგნოსტიკური ზარის დასაჯავშნად.
 
-> Diagnostic-lite assessment only — explicitly **not** a full Marketing MRI.
+---
 
-## Stack
+## 📖 ჯერ ეს წაიკითხე (ნებისმიერი ცვლილების წინ)
 
-- Next.js 14 (App Router) + TypeScript
-- Tailwind CSS
-- Supabase (Postgres) for submission storage
-- Resend for transactional email
-- Zod for validation
+თუ ხარ ახალი დეველოპერი ან AI agent (ChatGPT Codex, Claude, Cursor, etc.):
 
-## File structure
+1. წაიკითხე **[`AGENTS.md`](./AGENTS.md)** — სრული ტექნიკური კონტექსტი (არქიტექტურა, scoring ლოგიკა, ფაილების სტრუქტურა, gotchas, ყველაფერი).
+2. შემდეგ დაუბრუნდი ამ README-ს ოპერაციული ნაწილისთვის (პლატფორმები, წვდომა, deploy).
 
-```
-mini-marketing-mri/
-├── src/
-│   ├── app/
-│   │   ├── api/quiz/submit/route.ts    # POST endpoint: validate → score → store → email
-│   │   ├── quiz/page.tsx               # Multi-step quiz (client)
-│   │   ├── result/[id]/page.tsx        # Server-rendered result page
-│   │   ├── thank-you/page.tsx
-│   │   ├── layout.tsx
-│   │   ├── page.tsx                    # Landing page
-│   │   └── globals.css
-│   ├── components/
-│   │   ├── ProgressBar.tsx
-│   │   ├── QuizClient.tsx
-│   │   └── ResultView.tsx
-│   └── lib/
-│       ├── analytics.ts                # Stub event tracker
-│       ├── bottlenecks.ts              # Per-dimension diagnostic copy
-│       ├── email.ts                    # Resend HTML/text email
-│       ├── quiz-data.ts                # 7 questions in Georgian
-│       ├── scoring.ts                  # Scoring + health level + recommendation
-│       ├── supabase.ts                 # Server-side client factory
-│       └── validation.ts               # Zod submission schema
-├── supabase/migrations/0001_init.sql
-├── .env.example
-├── tailwind.config.ts
-├── next.config.js
-├── tsconfig.json
-└── package.json
-```
+ეს ფაილი **გვიჩვენებს რა საიდან მართოს** — `AGENTS.md` **გვიჩვენებს როგორ შეცვალო კოდი**.
 
-## Setup
+---
 
-### 1. Install
+## 🎯 რა აკეთებს ეს პროდუქტი
 
-```bash
-npm install
-```
+**ვისთვისაა:** ქართული SMB-ები (გადახდისუნარიანი მცირე და საშუალო ბიზნესები) რომლებიც ბიუჯეტს ხარჯავენ მარკეტინგზე, მაგრამ შედეგი არ ჩანს.
 
-### 2. Environment variables
+**რას აკეთებს:**
+1. ვიზიტორი ხსნის ლენდინგ გვერდს → იწყებს ქვიზს (16 კითხვა, ~5 წუთი)
+2. ბოლოს ავსებს კონტაქტს (სახელი, ემეილი, ტელეფონი, კომპანია)
+3. იღებს მინი დიაგნოსტიკას **ელფოსტაზე** — 3 ქულა, საეჭვო ზონა, 3 პრაქტიკული შემოწმება, 7-დღიანი მოქმედების გეგმა
+4. ემეილში CTA → დიაგნოსტიკური ზარის დაჯავშნა
+5. ზარი → შესაძლო კონვერსია სრულ Marketing MRI-ში (4,000₾ პროდუქტი)
 
-Copy `.env.example` → `.env.local` and fill in:
+**რას არ აკეთებს:** ეს არ არის სრული Marketing MRI. ეს არის **საწყისი დიაგნოსტიკა** — სიგნალები, არა ვერდიქტი. ეს დისკლეიმერი ყველგან უნდა იყოს (landing, quiz, email).
 
-```
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...        # required — used by /api/quiz/submit
-RESEND_API_KEY=re_...
-RESEND_FROM_EMAIL="Davit Chkotua <hello@your-verified-domain.com>"
-BOOK_CALL_URL=https://your-cal-link
-FULL_MRI_URL=https://your-mri-page
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
+---
 
-### 3. Supabase
+## 🔗 ყველა პლატფორმა (ცხრილი)
 
-In the Supabase SQL editor, run the migration:
+| რა | URL | ვისთვის |
+|----|-----|---------|
+| **Live საიტი** | [quiz.davitchkotua.com](https://quiz.davitchkotua.com) | მომხმარებლები |
+| **GitHub Repo** | [github.com/davitchkotua/mini-marketing-mri](https://github.com/davitchkotua/mini-marketing-mri) | კოდი |
+| **Vercel Dashboard** | [vercel.com](https://vercel.com) → `mini-marketing-mri` | Deploy, logs, env vars |
+| **Supabase Dashboard** | [supabase.com/dashboard/project/shvzebnvqcqyvcddruki](https://supabase.com/dashboard/project/shvzebnvqcqyvcddruki) | DB, SQL editor, submissions |
+| **Resend Dashboard** | [resend.com/dashboard](https://resend.com/dashboard) | Email logs, API keys |
+| **Custom Domain DNS** | [godaddy.com](https://godaddy.com) | `davitchkotua.com` DNS |
+| **Admin notification ემეილი** | hello@davitchkotua.com | submission alerts |
+| **Booking CTA destination** | [davitchkotua.com/#book-call](https://www.davitchkotua.com/#book-call) | Cal.com booking page |
 
-```bash
-supabase/migrations/0001_init.sql
-```
+---
 
-Or copy the SQL inline:
+## 🔐 წვდომა და პაროლები
 
-```sql
--- See supabase/migrations/0001_init.sql for full schema.
-create table public.quiz_submissions (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamptz default now(),
-  name text not null,
-  email text not null,
-  company text not null,
-  role text not null,
-  website text,
-  revenue_range text,
-  team_size text,
-  answers jsonb not null,
-  dimension_scores jsonb not null,
-  total_score int not null,
-  percentage int not null,
-  health_level text not null,
-  primary_bottleneck text not null,
-  result_summary jsonb not null,
-  email_sent boolean default false,
-  source text default 'mini_marketing_mri_quiz',
-  utm_source text, utm_medium text, utm_campaign text,
-  utm_content text, utm_term text
-);
-```
+ყველა ანგარიში **Davit Chkotua**-ს ბრენდულ ანგარიშზე რეგისტრირებულია.
 
-RLS is enabled and anon access is blocked. The API route writes/reads via the **service role key** server-side.
+### პაროლები / API keys
 
-### 4. Resend
+> ⚠️ **არცერთი პაროლი/key ამ რეპოში არ უნდა მოხვდეს.** ყველაფერი Vercel env vars-ში ან password manager-შია.
 
-1. Create a Resend account, verify a sending domain.
-2. Set `RESEND_API_KEY` and `RESEND_FROM_EMAIL` (must be from the verified domain).
-3. In dev, you can send to your own address only until the domain is verified.
+| სად | რა გჭირდება | სად ნახო |
+|-----|-------------|----------|
+| Vercel | Account login | `davitchkotua@gmail.com` — Google login |
+| GitHub | repo write access | `davitchkotua` account |
+| Supabase | project access | invited team member, ან owner login |
+| Resend | API key | Resend Dashboard → API Keys (owner-ის წვდომა) |
+| Domain (GoDaddy) | DNS management | GoDaddy account credentials |
+| `hello@davitchkotua.com` | inbox | Davit-ის Google Workspace |
 
-### 5. Run
+**პაროლების შენახვა:** [აქ ჩაწერე შენი password manager — 1Password / Bitwarden / Apple Keychain / etc.]
+
+**ვისზე მისწერო წვდომისთვის:** **Davit Chkotua** — owner, [hello@davitchkotua.com](mailto:hello@davitchkotua.com)
+
+---
+
+## ⚙️ Environment Variables (Vercel)
+
+Vercel Dashboard → Project → Settings → Environment Variables-ში დაყენებულია:
 
 ```bash
-npm run dev
-# http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://shvzebnvqcqyvcddruki.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+SUPABASE_SERVICE_ROLE_KEY=<service role — server-only, RLS-ს გადასაბიჯებლად>
+RESEND_API_KEY=<Resend API key>
+RESEND_FROM_EMAIL="Davit Chkotua <hello@davitchkotua.com>"
+BOOK_CALL_URL=https://www.davitchkotua.com/#book-call
 ```
 
-## Deployment (Vercel)
+**ლოკალური დეველოპმენტისთვის:** გადააკოპირე ეს Vercel-დან `.env.local` ფაილში პროექტის root-ში. `.env.local` `.gitignore`-შია — არასდროს ჩააკომიტო.
 
-1. Push to GitHub, import into Vercel.
-2. Add all env vars from `.env.local` into the Vercel project settings.
-3. Deploy. The API route runs on Node.js runtime (already configured).
+---
 
-## Scoring logic
+## 🏗️ Tech Stack (მოკლედ)
 
-- 7 dimensions × 0–4 each → max 28.
-- Health levels:
-  - 0–7 — Critical Leakage
-  - 8–14 — Unstable Growth System
-  - 15–21 — Partially Built Marketing Architecture
-  - 22–28 — Strong Base, Needs Precision
-- Primary bottleneck = lowest-scoring dimension. Ties broken in this order:
-  Money Clarity → Offer Clarity → Funnel Visibility → Conversion Evidence →
-  ICP Clarity → Execution Rhythm → Decision System.
+- **Framework:** Next.js 14 (App Router) + TypeScript
+- **Styling:** Tailwind CSS (dark theme `#170303` / accent `#FFB21A`)
+- **Database:** Supabase (PostgreSQL + Row Level Security)
+- **Email:** Resend
+- **Validation:** Zod
+- **Hosting:** Vercel (auto-deploy `main` branch-დან)
 
-## Analytics events (stubs)
+დეტალური ფაილ-სტრუქტურა და როგორ რა მუშაობს → **[`AGENTS.md`](./AGENTS.md)**
 
-`src/lib/analytics.ts` exposes a `track(event, payload)` helper that logs to console in dev. Replace the function body with your provider (PostHog, Plausible, GA4, etc.) when ready. Events emitted:
+---
 
-- `quiz_started`
-- `quiz_step_completed`
-- `quiz_submitted`
-- `result_viewed`
-- `call_cta_clicked`
-- `mri_cta_clicked`
+## 🚀 როგორ მუშაობს Deploy
 
-## Things to configure manually
+ერთი წინადადებით: **GitHub `main` branch-ზე push → Vercel აავტომატურად აშენებს და 2-3 წუთში ცოცხალია.**
 
-- Supabase project + run migration
-- Resend account + verified sending domain + `RESEND_FROM_EMAIL`
-- `BOOK_CALL_URL` (Cal.com / Calendly / etc.)
-- `FULL_MRI_URL` (landing page for the full Marketing MRI offer)
-- Optional: hook a real analytics provider into `src/lib/analytics.ts`
-- Optional: replace placeholder Google Fonts CDN import in `globals.css` with a self-hosted Noto Sans Georgian for production
+### ნაბიჯ-ნაბიჯ:
+1. ლოკალურად შეცვალე კოდი
+2. `git add . && git commit -m "..." && git push origin main`
+3. გახსენი [Vercel Dashboard](https://vercel.com) — Deployments tab-ში დაინახავ ახალ build-ს ("Building" → "Ready")
+4. როცა "Ready" გახდება, **hard refresh** ბრაუზერში: `Cmd+Shift+R` (Mac) / `Ctrl+Shift+R` (Win)
+5. quiz.davitchkotua.com-ზე უკვე ცოცხალია
 
-## Assumptions
+### Rollback (თუ რამე გაფუჭდა)
+Vercel Dashboard → Deployments → იპოვე წინა მუშა deployment → ⋯ → **Promote to Production**.
 
-- Sending happens server-side in the `/api/quiz/submit` handler. If email fails, the submission is still stored (so no lead is lost) and `email_sent` stays `false` — you can retry from Supabase.
-- The result page is publicly accessible by UUID — predictable enough for sharing, hard to enumerate. If you want stronger access control, add a short signed token to the URL.
-- UTMs are read from query string on the quiz page and forwarded with the submission.
-- Copy is locked in Georgian per brand canon. Code, types, and DB columns are in English.
+---
+
+## 🗄️ Database — როგორ ნახო Submissions
+
+1. გახსენი [Supabase Dashboard](https://supabase.com/dashboard/project/shvzebnvqcqyvcddruki)
+2. მარცხნივ → **Table Editor** → `quiz_submissions`
+3. ან: **SQL Editor** → New Query →
+   ```sql
+   SELECT name, email, phone, company, created_at,
+          lost_investment_risk_score, problem_visibility_score, mri_readiness_score,
+          primary_suspected_loss_point
+   FROM quiz_submissions
+   ORDER BY created_at DESC
+   LIMIT 50;
+   ```
+
+---
+
+## 📧 ემეილ ფლოუ
+
+ყოველი submission-ის შემდეგ ავტომატურად იგზავნება **ორი** ემეილი (Resend-ით):
+
+1. **მომხმარებლის ემეილზე** — პერსონალიზებული მინი დიაგნოსტიკა (3 ქულა, საეჭვო ზონა, 7-დღიანი გეგმა, CTA).
+2. **hello@davitchkotua.com-ზე** — admin notification, subject `mini Marketing MRI კლიენტი`, შიგნით სრული კონტაქტი + ყველა 16 პასუხი + ქულები.
+
+**Email logs:** [Resend Dashboard](https://resend.com/dashboard) → Emails tab — ნახავ რომელი მისულია, რომელი bounce-დება.
+
+---
+
+## 🛠️ ხშირი ოპერაციები
+
+| რა მინდა გავაკეთო | სად მივიდე |
+|-------------------|-----------|
+| კოდის ცვლილება | ლოკალურად → commit → push → Vercel auto-deploy |
+| Submissions ნახვა | Supabase → Table Editor → `quiz_submissions` |
+| ემეილების ისტორია | Resend Dashboard → Emails |
+| DB schema-ის ცვლილება | Supabase → SQL Editor-ში SQL ხელით + `supabase/migrations/`-ში ფაილი |
+| Vercel logs | Vercel Dashboard → Logs tab |
+| Env var-ის ცვლილება | Vercel → Settings → Environment Variables → ცვლილების შემდეგ **redeploy** |
+| Domain-ის ცვლილება | GoDaddy DNS + Vercel → Settings → Domains |
+
+---
+
+## ⚠️ ცნობილი პრობლემები (Gotchas)
+
+1. **Supabase SQL Editor paste bug:** Multi-line SQL-ის paste-ი ხანდახან ხაზებს ერთმანეთში აერთებს. ჯერ Cmd+A → Delete, შემდეგ paste.
+2. **Browser cache:** Vercel-ის deploy-ის შემდეგ აუცილებლად **hard refresh** (`Cmd+Shift+R`), თორემ ძველი JS bundle-ი დაგრჩება.
+3. **Email auto-inversion:** Gmail / Apple Mail dark mode-ში თეთრად აქცევს ემეილს. HTML-ში `bgcolor` ატრიბუტები ჩამატებულია — **არ წაშალო**.
+4. **Legacy v1 columns:** DB-ში არსებობს ძველი v1 სვეტები (`dimension_scores`, `total_score`, etc.). NOT NULL-ი ჩამოშლილია, მაგრამ თუ ოდესმე re-init გააკეთო, ხელახლა მოგიწევს ჩამოშლა.
+
+დანარჩენი → `AGENTS.md` § 13 "Known Gotchas".
+
+---
+
+## 📝 ცვლილების შემდეგ რა შევამოწმო
+
+`AGENTS.md` § 14 "Testing Checklist"-ში სრული 8-პუნქტიანი QA სია. შემოკლებით:
+
+1. გაიარე ქვიზი ბოლომდე (16 კითხვა)
+2. შეავსე lead form
+3. დაჯვერდი thank-you გვერდზე
+4. შემოწმე **შენი ემეილი** (dark theme, ყველა ქულა)
+5. შემოწმე `hello@davitchkotua.com` (admin notification, ყველა პასუხი)
+6. შემოწმე Supabase row შესაბამისი მონაცემებით
+
+---
+
+## 🆘 თუ რამე გაფუჭდა
+
+| სიმპტომი | რა შეამოწმე |
+|----------|-------------|
+| საიტი არ იხსნება | Vercel → Deployments → Production status |
+| Quiz submission ფეილდება | Vercel → Logs → `/api/quiz/submit` errors |
+| ემეილი არ მოდის | Resend Dashboard → Emails tab |
+| Submission DB-ში არ ხვდება | Supabase → Logs → SQL queries |
+| Custom domain არ მუშაობს | GoDaddy DNS + Vercel → Domains |
+
+ვერ მოაგვარე? — დაუკავშირდი **Davit Chkotua**-ს ([hello@davitchkotua.com](mailto:hello@davitchkotua.com)).
+
+---
+
+## 📚 დამატებითი ფაილები
+
+- **[`AGENTS.md`](./AGENTS.md)** — სრული ტექნიკური დოკუმენტაცია (450+ ხაზი, ყველაფერი კოდის შესახებ)
+- **[`HANDOFF.md`](./HANDOFF.md)** — იგივე რაც AGENTS.md, ადამიანებისთვის სახელით
+- **`supabase/migrations/`** — DB schema-ის ისტორია
+
+---
+
+## 🧭 ბრენდ კონტექსტი
+
+ეს პროდუქტი **Marketing Architect Studio**-ს ნაწილია — Davit Chkotua-ს კონსალტინგ პრაქტიკის. სტუდიაში ხუთი მთავარი პროდუქტია:
+
+1. Marketing MRI (4,000₾ / 14 დღე) — სრული დიაგნოსტიკა, **ეს ქვიზი არის intake**
+2. Marketing Outsourcing
+3. Practical Marketing (კურსი)
+4. Marketing Architect OS
+5. Davit-Led консультация
+
+ბრენდის ფერები: `#170303` ფონი + `#FFB21A` accent. ხმა: დიაგნოსტიკური, თავდაჯერებული, არა hype.
+
+---
+
+**მაინტეინერი:** Davit Chkotua — [davitchkotua.com](https://www.davitchkotua.com) — [hello@davitchkotua.com](mailto:hello@davitchkotua.com)
